@@ -1,0 +1,1017 @@
+Script started on 2026-01-31 20:57:52+03:30 [TERM="xterm-256color" TTY="/dev/pts/0" COLUMNS="133" LINES="40"]
+[?2004h]0;alireza@manager01: ~/Docker-project[01;32malireza@manager01[00m:[01;34m~/Docker-project[00m$ car[Kt scripts/
+[?2004lcat: scripts/: Is a directory
+[?2004h]0;alireza@manager01: ~/Docker-project[01;32malireza@manager01[00m:[01;34m~/Docker-project[00m$ cat scripts/[K[K[K[K[K[K[K[KARCHITECTURE.md 
+[?2004l# ShopStream – Architecture & Planning Document
+
+## 1. System Overview
+
+ShopStream is a production-oriented e-commerce platform designed using a microservices architecture and deployed with Docker Swarm.
+
+The goal of this system is to support core e-commerce capabilities such as user authentication, product catalog management, order processing, and notifications while ensuring scalability, high availability, and fault tolerance.
+
+A microservices approach is used to allow independent development, deployment, and scaling of each service based on workload and responsibility.
+
+Docker Swarm is selected as the container orchestrator to provide multi-node scheduling, service replication, rolling updates, self-healing, and built-in service discovery.
+
+In this phase, the project focuses on planning and infrastructure setup only, including cluster design, networking, secrets, and persistence, without implementing full business logic.
+
+---
+
+## 2. Service Architecture
+
+The platform is composed of multiple independent services, each responsible for a specific domain of the system. This separation improves scalability, maintainability, and fault isolation.
+
+### 2.1 Edge Layer
+- **Traefik**  
+  Acts as the ingress controller and reverse proxy, handling incoming HTTP traffic, load balancing, and routing requests to internal services.
+
+### 2.2 Application Layer
+- **Frontend Service**  
+  A static web application (SPA) served via Nginx, responsible for rendering the user interface and communicating with backend APIs.
+
+- **API Gateway**  
+  Serves as a single entry point for backend APIs, responsible for request routing, authentication validation, and basic rate limiting.
+
+- **Authentication Service**  
+  Handles user authentication, token generation (JWT), and session-related logic.
+
+- **Product Service**  
+  Manages product catalog operations including listing, creation, updates, and search integration.
+
+- **Order Service**  
+  Responsible for order creation, processing, and interaction with payment and inventory systems (mocked in this phase).
+
+- **Notification Service**  
+  Handles real-time notifications such as order status updates using WebSocket or asynchronous messaging.
+
+### 2.3 Data Layer
+- **MariaDB**  
+  Primary relational database for persistent application data.
+
+- **Redis**  
+  Used for session storage, caching, and rate limiting.
+
+- **RabbitMQ**  
+  Message broker used for asynchronous communication between services.
+
+- **MinIO**  
+  Object storage for static assets such as product images.
+
+- **Elasticsearch**  
+  Provides full-text search capabilities for the product catalog.
+
+### 2.4 Observability Layer
+- **Prometheus**  
+  Collects metrics from services and infrastructure.
+
+- **Grafana**  
+  Visualizes metrics through dashboards.
+
+- **Loki**  
+  Aggregates and stores logs from all services.
+
+- **Promtail**  
+  Collects logs from nodes and forwards them to Loki.
+
+---
+
+## 3. Network Design and Isolation
+
+The platform uses multiple Docker overlay networks to enforce strict network isolation and follow the principle of least privilege.
+
+### Networks
+- **traefik-public**  
+  Public-facing network used exclusively by Traefik to accept incoming traffic from the internet.
+
+- **frontend**  
+  Network connecting the frontend service with Traefik.
+
+- **backend** (internal)  
+  Internal network used by backend microservices. This network is not accessible externally.
+
+- **data** (internal)  
+  Dedicated internal network for databases and stateful services.
+
+- **monitoring**  
+  Network reserved for observability and monitoring components.
+
+Services are attached only to the networks they require, preventing unauthorized access between layers.
+
+---
+
+## 4. Secrets Management
+
+All sensitive information is managed using Docker Secrets to avoid hardcoding credentials in configuration files or version control.
+
+### Secrets include:
+- Database root and application passwords
+- JWT signing keys
+- Redis authentication password
+- RabbitMQ credentials
+- MinIO secret keys
+- Grafana admin password
+- TLS private keys (if applicable)
+
+Secrets are injected into containers at runtime and never stored in images or source code.
+
+---
+
+## 5. Configuration Management
+
+Non-sensitive configuration files are managed using Docker Configs. These configurations are version-controlled and mounted into containers at runtime.
+
+### Configs include:
+- Traefik configuration
+- Nginx configuration for frontend
+- Prometheus and Alertmanager configuration
+- Grafana dashboards and datasources
+- Loki configuration
+
+---
+
+## 6. Data Persistence Strategy
+
+All stateful services use Docker volumes to ensure data persistence beyond the lifecycle of individual containers.
+
+### Persistent volumes include:
+- MariaDB data
+- Redis data
+- RabbitMQ data
+- MinIO data
+- Elasticsearch data
+- Prometheus data
+- Grafana data
+- Loki data
+
+This ensures that application data is preserved during restarts, updates, or failures.
+
+---
+
+## 7. Node Placement Strategy
+
+Placement constraints are used to improve reliability and operational safety.
+
+- Traefik and critical stateful services are scheduled on manager nodes.
+- Stateless application services are distributed across worker nodes.
+- Services are spread across nodes to maximize availability.
+
+---
+
+## 8. Deployment and Update Strategy
+
+All services are deployed using Docker Stack with a declarative configuration.
+
+Rolling updates are configured to ensure zero-downtime deployments:
+- Services are updated one replica at a time.
+- New containers start before old ones are stopped.
+- Automatic rollback is triggered in case of failure.
+
+---
+
+## 9. Verification and Validation
+
+The infrastructure setup is verified using the following commands:
+- `docker node ls` to validate cluster state
+- `docker network ls` to verify network creation
+- `docker secret ls` to confirm secrets management
+
+These checks ensure the platform is ready for application deployment in later phases.
+
+[?2004h]0;alireza@manager01: ~/Docker-project[01;32malireza@manager01[00m:[01;34m~/Docker-project[00m$ cat ARCHITECTURE.md [K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[Kla
+[?2004lARCHITECTURE.md  README.md  RUNBOOK.md  [0m[01;34mscripts[0m  typescript
+[?2004h]0;alireza@manager01: ~/Docker-project[01;32malireza@manager01[00m:[01;34m~/Docker-project[00m$ ls
+[?2004lARCHITECTURE.md  README.md  RUNBOOK.md  [0m[01;34mscripts[0m  typescript
+[?2004h]0;alireza@manager01: ~/Docker-project[01;32malireza@manager01[00m:[01;34m~/Docker-project[00m$ cat tu[Kypescript 
+[?2004lScript started on 2026-01-31 20:57:52+03:30 [TERM="xterm-256color" TTY="/dev/pts/0" COLUMNS="133" LINES="40"]
+[?2004h]0;alireza@manager01: ~/Docker-project[01;32malireza@manager01[00m:[01;34m~/Docker-project[00m$ car[Kt scripts/
+[?2004lcat: scripts/: Is a directory
+[?2004h]0;alireza@manager01: ~/Docker-project[01;32malireza@manager01[00m:[01;34m~/Docker-project[00m$ cat scripts/[K[K[K[K[K[K[K[KARCHITECTURE.md 
+[?2004l# ShopStream – Architecture & Planning Document
+
+## 1. System Overview
+
+ShopStream is a production-oriented e-commerce platform designed using a microservices architecture and deployed with Docker Swarm.
+
+The goal of this system is to support core e-commerce capabilities such as user authentication, product catalog management, order processing, and notifications while ensuring scalability, high availability, and fault tolerance.
+
+A microservices approach is used to allow independent development, deployment, and scaling of each service based on workload and responsibility.
+
+Docker Swarm is selected as the container orchestrator to provide multi-node scheduling, service replication, rolling updates, self-healing, and built-in service discovery.
+
+In this phase, the project focuses on planning and infrastructure setup only, including cluster design, networking, secrets, and persistence, without implementing full business logic.
+
+---
+
+## 2. Service Architecture
+
+The platform is composed of multiple independent services, each responsible for a specific domain of the system. This separation improves scalability, maintainability, and fault isolation.
+
+### 2.1 Edge Layer
+- **Traefik**  
+  Acts as the ingress controller and reverse proxy, handling incoming HTTP traffic, load balancing, and routing requests to internal services.
+
+### 2.2 Application Layer
+- **Frontend Service**  
+  A static web application (SPA) served via Nginx, responsible for rendering the user interface and communicating with backend APIs.
+
+- **API Gateway**  
+  Serves as a single entry point for backend APIs, responsible for request routing, authentication validation, and basic rate limiting.
+
+- **Authentication Service**  
+  Handles user authentication, token generation (JWT), and session-related logic.
+
+- **Product Service**  
+  Manages product catalog operations including listing, creation, updates, and search integration.
+
+- **Order Service**  
+  Responsible for order creation, processing, and interaction with payment and inventory systems (mocked in this phase).
+
+- **Notification Service**  
+  Handles real-time notifications such as order status updates using WebSocket or asynchronous messaging.
+
+### 2.3 Data Layer
+- **MariaDB**  
+  Primary relational database for persistent application data.
+
+- **Redis**  
+  Used for session storage, caching, and rate limiting.
+
+- **RabbitMQ**  
+  Message broker used for asynchronous communication between services.
+
+- **MinIO**  
+  Object storage for static assets such as product images.
+
+- **Elasticsearch**  
+  Provides full-text search capabilities for the product catalog.
+
+### 2.4 Observability Layer
+- **Prometheus**  
+  Collects metrics from services and infrastructure.
+
+- **Grafana**  
+  Visualizes metrics through dashboards.
+
+- **Loki**  
+  Aggregates and stores logs from all services.
+
+- **Promtail**  
+  Collects logs from nodes and forwards them to Loki.
+
+---
+
+## 3. Network Design and Isolation
+
+The platform uses multiple Docker overlay networks to enforce strict network isolation and follow the principle of least privilege.
+
+### Networks
+- **traefik-public**  
+  Public-facing network used exclusively by Traefik to accept incoming traffic from the internet.
+
+- **frontend**  
+  Network connecting the frontend service with Traefik.
+
+- **backend** (internal)  
+  Internal network used by backend microservices. This network is not accessible externally.
+
+- **data** (internal)  
+  Dedicated internal network for databases and stateful services.
+
+- **monitoring**  
+  Network re[?2004h]0;alireza@manager01: ~/Docker-project[01;32malireza@manager01[00m:[01;34m~/Docker-project[00m$ 
+[?2004l[?2004h]0;alireza@manager01: ~/Docker-project[01;32malireza@manager01[00m:[01;34m~/Docker-project[00m$ 
+[?2004l[?2004h]0;alireza@manager01: ~/Docker-project[01;32malireza@manager01[00m:[01;34m~/Docker-project[00m$ 
+[?2004l[?2004h]0;alireza@manager01: ~/Docker-project[01;32malireza@manager01[00m:[01;34m~/Docker-project[00m$ 
+[?2004l[?2004h]0;alireza@manager01: ~/Docker-project[01;32malireza@manager01[00m:[01;34m~/Docker-project[00m$ cat typescript 
+[?2004lScript started on 2026-01-31 20:57:52+03:30 [TERM="xterm-256color" TTY="/dev/pts/0" COLUMNS="133" LINES="40"]
+[?2004h]0;alireza@manager01: ~/Docker-project[01;32malireza@manager01[00m:[01;34m~/Docker-project[00m$ car[Kt scripts/
+[?2004lcat: scripts/: Is a directory
+[?2004h]0;alireza@manager01: ~/Docker-project[01;32malireza@manager01[00m:[01;34m~/Docker-project[00m$ cat scripts/[K[K[K[K[K[K[K[KARCHITECTURE.md 
+[?2004l# ShopStream – Architecture & Planning Document
+
+## 1. System Overview
+
+ShopStream is a production-oriented e-commerce platform designed using a microservices architecture and deployed with Docker Swarm.
+
+The goal of this system is to support core e-commerce capabilities such as user authentication, product catalog management, order processing, and notifications while ensuring scalability, high availability, and fault tolerance.
+
+A microservices approach is used to allow independent development, deployment, and scaling of each service based on workload and responsibility.
+
+Docker Swarm is selected as the container orchestrator to provide multi-node scheduling, service replication, rolling updates, self-healing, and built-in service discovery.
+
+In this phase, the project focuses on planning and infrastructure setup only, including cluster design, networking, secrets, and persistence, without implementing full business logic.
+
+---
+
+## 2. Service Architecture
+
+The platform is composed of multiple independent services, each responsible for a specific domain of the system. This separation improves scalability, maintainability, and fault isolation.
+
+### 2.1 Edge Layer
+- **Traefik**  
+  Acts as the ingress controller and reverse proxy, handling incoming HTTP traffic, load balancing, and routing requests to internal services.
+
+### 2.2 Application Layer
+- **Frontend Service**  
+  A static web application (SPA) served via Nginx, responsible for rendering the user interface and communicating with backend APIs.
+
+- **API Gateway**  
+  Serves as a single entry point for backend APIs, responsible for request routing, authentication validation, and basic rate limiting.
+
+- **Authentication Service**  
+  Handles user authentication, token generation (JWT), and session-related logic.
+
+- **Product Service**  
+  Manages product catalog operations including listing, creation, updates, and search integration.
+
+- **Order Service**  
+  Responsible for order creation, processing, and interaction with payment and inventory systems (mocked in this phase).
+
+- **Notification Service**  
+  Handles real-time notifications such as order status updates using WebSocket or asynchronous messaging.
+
+### 2.3 Data Layer
+- **MariaDB**  
+  Primary relational database for persistent application data.
+
+- **Redis**  
+  Used for session storage, caching, and rate limiting.
+
+- **RabbitMQ**  
+  Message broker used for asynchronous communication between services.
+
+- **MinIO**  
+  Object storage for static assets such as product images.
+
+- **Elasticsearch**  
+  Provides full-text search capabilities for the product catalog.
+
+### 2.4 Observability Layer
+- **Prometheus**  
+  Collects metrics from services and infrastructure.
+
+- **Grafana**  
+  Visualizes metrics through dashboards.
+
+- **Loki**  
+  Aggregates and stores logs from all services.
+
+- **Promtail**  
+  Collects logs from nodes and forwards them to Loki.
+
+---
+
+## 3. Network Design and Isolation
+
+The platform uses multiple Docker overlay networks to enforce strict network isolation and follow the principle of least privilege.
+
+### Networks
+- **traefik-public**  
+  Public-facing network used exclusively by Traefik to accept incoming traffic from the internet.
+
+- **frontend**  
+  Network connecting the frontend service with Traefik.
+
+- **backend** (internal)  
+  Internal network used by backend microservices. This network is not accessible externally.
+
+- **data** (internal)  
+  Dedicated internal network for databases and stateful services.
+
+- **monitoring**  
+  Network reserved for observability and monitoring components.
+
+Services are attached only to the networks they require, preventing unauthorized access between layers.
+
+---
+
+## 4. Secrets Management
+
+All sensitive information is managed using Docker Secrets to avoid hardcoding credentials in configuration files or version control.
+
+### Secrets include:
+- Database root and application passwords
+- JWT signing keys
+- Redis authentication password
+- RabbitMQ credentials
+- MinIO secret keys
+- Grafana admin password
+- TLS private keys (if applicable)
+
+Secrets are injected into containers at runtime and never stored in images or source code.
+
+---
+
+## 5. Configuration Management
+
+Non-sensitive configuration files are managed using Docker Configs. These configurations are version-controlled and mounted into containers at runtime.
+
+### Configs include:
+- Traefik configuration
+- Nginx configuration for frontend
+- Prometheus and Alertmanager configuration
+- Grafana dashboards and datasources
+- Loki configuration
+
+---
+
+## 6. Data Persistence Strategy
+
+All stateful services use Docker volumes to ensure data persistence beyond the lifecycle of individual containers.
+
+### Persistent volumes include:
+- MariaDB data
+- Redis data
+- RabbitMQ data
+- MinIO data
+- Elasticsearch data
+- Prometheus data
+- Grafana data
+- Loki data
+
+This ensures that application data is preserved during restarts, updates, or failures.
+
+---
+
+## 7. Node Placement Strategy
+
+Placement constraints are used to improve reliability and operational safety.
+
+- Traefik and critical stateful services are scheduled on manager nodes.
+- Stateless application services are distributed across worker nodes.
+- Services are spread across nodes to maximize availability.
+
+---
+
+## 8. Deployment and Update Strategy
+
+All services are deployed using Docker Stack with a declarative configuration.
+
+Rolling updates are configured to ensure zero-downtime deployments:
+- Services are updated one replica at a time.
+- New containers start before old ones are stopped.
+- Automatic rollback is triggered in case of failure.
+
+---
+
+## 9. Verification and Validation
+
+The infrastructure setup is verified using the following commands:
+- `docker node ls` to validate cluster state
+- `docker network ls` to verify network creation
+- `docker secret ls` to confirm secrets management
+
+These checks ensure the platform is ready for application deployment in later phases.
+
+[?2004h]0;alireza@manager01: ~/Docker-project[01;32malireza@manager01[00m:[01;34m~/Docker-project[00m$ cat ARCHITECTURE.md [K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[Kla
+[?2004lARCHITECTURE.md  README.md  RUNBOOK.md  [0m[01;34mscripts[0m  typescript
+[?2004h]0;alireza@manager01: ~/Docker-project[01;32malireza@manager01[00m:[01;34m~/Docker-project[00m$ ls
+[?2004lARCHITECTURE.md  README.md  RUNBOOK.md  [0m[01;34mscripts[0m  typescript
+[?2004h]0;alireza@manager01: ~/Docker-project[01;32malireza@manager01[00m:[01;34m~/Docker-project[00m$ cat tu[Kypescript 
+[?2004lScript started on 2026-01-31 20:57:52+03:30 [TERM="xterm-256color" TTY="/dev/pts/0" COLUMNS="133" LINES="40"]
+[?2004h]0;alireza@manager01: ~/Docker-project[01;32malireza@manager01[00m:[01;34m~/Docker-project[00m$ car[Kt scripts/
+[?2004lcat: scripts/: Is a directory
+[?2004h]0;alireza@manager01: ~/Docker-project[01;32malireza@manager01[00m:[01;34m~/Docker-project[00m$ cat scripts/[K[K[K[K[K[K[K[KARCHITECTURE.md 
+[?2004l# ShopStream – Architecture & Planning Document
+
+## 1. System Overview
+
+ShopStream is a production-oriented e-commerce platform designed using a microservices architecture and deployed with Docker Swarm.
+
+The goal of this system is to support core e-commerce capabilities such as user authentication, product catalog management, order processing, and notifications while ensuring scalability, high availability, and fault tolerance.
+
+A microservices approach is used to allow inde[?2004h]0;alireza@manager01: ~/Docker-project[01;32malireza@manager01[00m:[01;34m~/Docker-project[00m$ ls
+[?2004lARCHITECTURE.md  README.md  RUNBOOK.md  [0m[01;34mscripts[0m  typescript
+[?2004h]0;alireza@manager01: ~/Docker-project[01;32malireza@manager01[00m:[01;34m~/Docker-project[00m$ cat ReE[K[KEADME.md 
+[?2004l[?2004h]0;alireza@manager01: ~/Docker-project[01;32malireza@manager01[00m:[01;34m~/Docker-project[00m$ viim[K[Km README.md 
+[?2004l[?1049h[22;0;0t[>4;2m[?1h=[?2004h[?1004h[1;40r[?12h[?12l[22;2t[22;1t[27m[23m[29m[m[H[2J[?25l[40;1H"README.md" 0L, 0B[2;1H▽[6n[2;1H  [3;1HPzz\[0%m[6n[3;1H           [1;1H[>c]10;?]11;?[2;1H[94m~                                                                                                                                    [3;1H~                                                                                                                                    [4;1H~                                                                                                                                    [5;1H~                                                                                                                                    [6;1H~                                                                                                                                    [7;1H~                                                                                                                                    [8;1H~                                                                                                                                    [9;1H~                                                                                                                                    [10;1H~                                                                                                                                    [11;1H~                                                                                                                                    [12;1H~                                                                                                                                    [13;1H~                                                                                                                                    [14;1H~                                                                                                                                    [15;1H~                                                                                                                                    [16;1H~                                                                                                                                    [17;1H~                                                                                                                                    [18;1H~                                                                                                                                    [19;1H~                                                                                                                                    [20;1H~                                                                                                                                    [21;1H~                                                                                                                                    [22;1H~                                                                                                                                    [23;1H~                                                                                                                                    [24;1H~                                                                                                                                    [25;1H~                                                                                                                                    [26;1H~                                                                                                                                    [27;1H~                                                                                                                                    [28;1H~                                                                                                                                    [29;1H~                                                                                                                                    [30;1H~                                                                                                                                    [31;1H~                                                                                                                                    [32;1H~                                                                                                                                    [33;1H~                                                                                                                                    [34;1H~                                                                                                                                    [35;1H~                                                                                                                                    [36;1H~                                                                                                                                    [37;1H~                                                                                                                                    [38;1H~                                                                                                                                    [39;1H~                                                                                                                                    [m[40;116H0,0-1[9CAll[1;1H[?25h[?4m[?12$p[?25l[40;106H/[1;1H[40;107H0[1;1H[40;108Hc[1;1H[40;109H0[1;1H[40;110Hc[1;1H[40;111H/[1;1H[40;112H0[1;1H[40;113Hc[1;1H[40;114H0[1;1H[40;115Hc[1;1H[40;106H          [1;1H[27m[23m[29m[m[H[2J[2;1H[94m~                                                                                                                                    [3;1H~                                                                                                                                    [4;1H~                                                                                                                                    [5;1H~                                                                                                                                    [6;1H~                                                                                                                                    [7;1H~                                                                                                                                    [8;1H~                                                                                                                                    [9;1H~                                                                                                                                    [10;1H~                                                                                                                                    [11;1H~                                                                                                                                    [12;1H~                                                                                                                                    [13;1H~                                                                                                                                    [14;1H~                                                                                                                                    [15;1H~                                                                                                                                    [16;1H~                                                                                                                                    [17;1H~                                                                                                                                    [18;1H~                                                                                                                                    [19;1H~                                                                                                                                    [20;1H~                                                                                                                                    [21;1H~                                                                                                                                    [22;1H~                                                                                                                                    [23;1H~                                                                                                                                    [24;1H~                                                                                                                                    [25;1H~                                                                                                                                    [26;1H~                                                                                                                                    [27;1H~                                                                                                                                    [28;1H~                                                                                                                                    [29;1H~                                                                                                                                    [30;1H~                                                                                                                                    [31;1H~                                                                                                                                    [32;1H~                                                                                                                                    [33;1H~                                                                                                                                    [34;1H~                                                                                                                                    [35;1H~                                                                                                                                    [36;1H~                                                                                                                                    [37;1H~                                                                                                                                    [38;1H~                                                                                                                                    [39;1H~                                                                                                                                    [m[40;116H0,0-1[9CAll"README.md" 0L, 0B[1;1H[?25h[?25l[40;1H[1m-- INSERT --[m[40;13H[K[40;116H0,1[11CAll[1;1H[38;5;224m# [m[38;5;225mShopStream –[1;15H E-Commerce Platform[m[2;1H[K[3;1H[38;5;224m## [m[38;5;225mOverview[m[3;12H[K[4;1H[K[5;1H[1m**ShopStrea[m[5;12H[K[5;12H[?25h[?25l[1mm**[m is a production-ready, sca[?25h[?25llable e-commerce platform built using [1m**Docker Swarm**[m. [?25h[?25lIt is designed with a [1m**microservicee[6;1Hs ar[m[6;5H[K[6;5H[?25h[?25l[1mchitecture**[m to handle core functionalities such as:[7;1H[K[8;1H[93m-[m User Authe[8;13H[K[8;13H[?25h[?25lntication and Sessions
+[93m-[m Product Catalog and Search[9;29H[K[10;1H[93m-[m Shopping Ca[10;14H[K[10;14H[?25h[?25lrt Management
+[93m-[m Order Processing[11;19H[K[12;1H[93m-[m Real-Time Notifications[12;26H[K[13;1H- [13;3H[K[13;3H[?25h[?25l[93m-[m Centralized Logging
+[93m-[m Full Observability (Metrics, Alerts, Dashbo[14;46H[K[14;46H[?25h[?25lards)[15;1H[K[16;1HThis project aims to sho[16;25H[K[16;25H[?25h[?25lwcase DevOps principles, with a focus on [1m**automation*[?25h[?25l*[m, [1m**scalability**[m, [1m**availability**[m, and [?25h[?25l[1m**fault tolerr[17;1Hance**[m.[17;8H[K[18;1H[K[19;1H[38;5;224m## [m[38;5;225mFeatures[m[19;12H[K[20;1H[K[21;1H[93m-[m [1m**Docker Swarm**[m for orches[21;30H[K[21;30H[?25h[?25ltration and scaling
+[93m-[m [1m**Traefik**[m as reverse proxy and SSL term[22;44H[K[22;44H[?25h[?25lination
+[93m-[m [1m**Multi-replica services**[m to ensure high availabilit[23;56H[K[23;56H[?25h[?25ly[24;1H[K[24;1H[?25h[?25l[93m-[m [1m**Secret management**[m using Docker Secrets
+[93m-[m [1m**Networking iso[m[25;19H[K[25;19H[?25h[?25l[1mlation**[m for better security and performance
+[93m-[m [1m**Rolling update[m[26;19H[K[26;19H[?25h[?25l[1ms**[m with zero downtime
+[93m-[m [1m**Persistent storage**[m for stateful se[27;41H[K[27;41H[?25h[?25lrvi[?25h[?25lces (using Docker Volumes)
+[93m-[m [1m**Monitoring**[m with Prometheus an[28;36H[K[28;36H[?25h[?25ld Grafana
+[93m-[m [1m**Centralized logging*[m[29;25H[K[29;25H[?25h[?25l[1m*[m using Loki and Promtail[30;1H[K[31;1H[38;5;224m## [m[38;5;225mArchitecture[m[31;16H[K[32;1H[K[33;1HThe pla[33;8H[K[33;8H[?25h[?25ltform is built on the following [1m**microservic[?25h[?25les**[m:[34;1H[K[35;1H[38;5;224m### [m[38;5;225mEdge Layer[m[35;15H[K[36;1H[93m-[m [1m**Traefik**[m: Reverse proxy for routin[36;40H[K[36;40H[?25h[?25lg traffic to services with SSL term[?25h[?25lination and load balancing.[37;1H[K[38;1H[38;5;224m### [m[38;5;225mApplication Layer[m[38;22H[K[39;1H[93m-[m [1m**Frontend Service[m[39;21H[K[39;21H[?25h[?25l[1m**[m: A static web applicat[?25h[?25lion served via Nginx.[39;39H[?25h[?25l[1;39r[39;1H
+[1;40r[39;1H[93m-[m [1m**API Gateway**[m: Handles API request routing and authentication.[40;11H[1m(paste) --[m[40;116H[K[39;8H[?25h[?25l[1;39r[39;1H
+[1;40r[39;1H[93m-[m [1m**Authentication Service**[m: Manages user sessions and JWT token generation.[?25h[?25l[39;26H[?25h[?25l[1;39r[39;1H
+[1;40r[39;1H[93m-[m [1m**Product Service**[m: Manages product catalog and search functionality.[39;12H[?25h[?25l[1;39r[39;1H
+[1;40r[39;1H[93m-[m [1m**Order Service**[m: Handles ord[?25h[?25ler creation, processing, and payment.[38;16H[?25h[?25l[1;39r[1;1H[2M[1;40r[38;1H[93m-[m [1m**Notification Service**[m: Sends real-time notifications via WebSocket
+[94m~                                                                                                                                    [38;72H[?25h[?25l[ms.[39;1H[K[39;1H[?25h[?25l[42C[?25h[?25l[1;39r[1;1H[2M[1;40r[38;1H[38;5;224m### [m[38;5;225mData Layer[m
+[93m-[m [1m**MariaDB**[m: Primary relational database.[39;37H[?25h[?25l[1;39r[39;1H
+[1;40r[39;1H[93m-[m [1m**Redis**[m: Caching and session management.[15C[?25h[?25l[1;39r[39;1H
+[1;40r[39;1H[93m-[m [1m**RabbitMQ**[m: Message broker for asynchronous communication.[39;25H[?25h[?25l[1;39r[39;1H
+[1;40r[39;1H[93m-[m [1m**MinIO**[m: Object storage for product images.[39;34H[?25h[?25l[1;39r[39;1H
+[1;40r[39;1H[93m-[m [1m**Elasticsearch**[m: Full-text search for product catalog.[39;13H[?25h[?25l[1;39r[1;1H[2M[1;40r[39;1H[38;5;224m### [m[38;5;225mObservability Layer[38;18H[?25h[?25l[1;39r[m[1;1H[3M[1;40r[37;1H[93m-[m [1m**Prometheus**[m: Metrics collection.
+[93m-[m [1m**Grafana**[m: Dashboards and monitoring.
+[93m-[m [3m**[?25h[?25l[23m[1m**Loki**[m: Centralized logging.[?25h[?25l[1;39r[39;1H
+[1;40r[39;1H[93m-[m [1m**Promtail**[m: Collects logs from nodes and sends to Loki.[39;7H[?25h[?25l[1;39r[1;1H[2M[1;40r[39;1H[38;5;224m## [m[38;5;225mSetup Instructions[10C[?25h[?25l[1;39r[m[1;1H[3M[1;40r[38;1H[38;5;224m### [m[38;5;225mPrerequisites[m
+[93m1.[m [1m**Docker**[m: Docker 20.10 or later.[39;24H[?25h[?25l[1;39r[39;1H
+[1;40r[39;1H[93m2.[m [1m**Docker Swarm**[m: At least 3 nodes (1 manager, 2 workers).[39;17H[?25h[?25l[1;39r[39;1H
+[1;40r[39;1H[93m3.[m [1m**Git**[m: To clone this repository.[39;19H[?25h[?25l[1;39r[1;1H[2M[1;40r[39;1H[38;5;224m### [m[38;5;225mDeployment Steps[?25h[?25l[1;39r[m[1;1H[4M[1;40r[37;1H[93m1.[m [1m**Clone the repository:**[m
+[38;5;224m    ```bash[m
+    git clone https://github.com/<your-username>/Sh[?25h[?25lopStream.git[39;15H[?25h[?25l[1;39r[1;1H[4M[1;40r[36;5Hcd ShopStream
+[38;5;224m    ```[m
+
+[93m2.[m [1m**Deploy the stack:**[39;16H[?25h[?25l[1;39r[m[39;1H
+[1;40r[39;1H[93m    -[m Make sure Docker Swarm is[?25h[?25l initialized and the nodes are joined.[39;26H[?25h[?25l[1;39r[39;1H
+[1;40r[39;1H[93m    -[m Deploy the stack using:[15C[?25h[?25l[1;39r[1;1H[2M[1;40r[38;1H[38;5;224m      ```bash[m[39;7Hdocker stack deploy -c docker-stack.yml shopstream   [?25h[?25l[1;39r[1;1H[4M[1;40r[36;1H[38;5;224m      ```[m
+
+[93m3.[m [1m**Check the deployment status:**[m
+    [38;5;224m`[?25h[?25l    ```bash[23C[?25h[?25l[1;39r[m[1;1H[2M[1;40r[38;5Hdocker service ls
+    docker service ps shopstream_frontend[39;17H[?25h[?25l[1;39r[1;1H[3M[1;40r[37;1H[38;5;224m    ```[m
+
+[93m4.[m [1m**Access the application:**[7C[?25h[?25l[1;39r[m[39;1H
+[1;40r[39;1H[93m    -[m Frontend should be accessible at [38;5;224m`[mhttp://<manager-ip>:80[38;5;224m`[m.[?25h[?25l[1;39r[39;1H
+[1;40r[39;16H[?25h[?25l[1;39r[39;1H
+[1;40r[39;1H[38;5;224m### [m[38;5;225mSecrets and Configurations[16C[?25h[?25l[1;39r[m[39;1H
+[1;40r[39;1H[93m-[m Docker secrets are created automatically during deployment (e.g., [38;5;224m`[mdb_root_pas[?25h[?25lsword[38;5;224m`[m, [38;5;224m`[mjwt_secret[38;5;224m`[m).[39;29H[?25h[?25l[1;39r[39;1H
+[1;40r[39;1H[93m-[m Custom configurations for services like Traefik, Prometheus, and Grafan[?25h[?25la are stored in [38;5;224m`[mconfigs/[38;5;224m`[m directory.[39;23H[?25h[?25l[1;39r[1;1H[2M[1;40r[39;1H[38;5;224m### [m[38;5;225mTesting the Deployment[m    [?25h[?25l[1;39r[39;1H
+[1;40r[39;1H[93m-[m [1m**Health Check**[m: Ensure services are running by visiting [38;5;224m`[m/health[38;5;224m`[m endpoint for each service.[39;5H[?25h[?25l[1;39r[39;1H
+[1;40r[39;1H[93m-[m [1m**Logs**[m: Check the logs fo[?25h[?25lr any service-related issues using [38;5;224m`[mdocker service logs[38;5;224m`[m.[39;2H[?25h[?25l[1;39r[1;1H[2M[1;40r[39;1H[38;5;81m---[21C[?25h[?25l[1;39r[m[1;1H[4M[1;40r[37;1H[38;5;224m## [m[38;5;225mMonitoring and Observability[m
+
+The platform includes [1m**Prometheus**[m and [1m**Grafana**[m for monitoring:[39;16H[?25h[?25l[1;39r[1;1H[2M[1;40r[39;1H[93m-[m [1m**Prometheus**[m collects[?25h[?25l metrics from Docker containers and hosts.[39;17H[?25h[?25l[1;39r[39;1H
+[1;40r[39;1H[93m-[m [1m**Grafana**[m visualizes metrics via preconfigured dashboards.[39;13H[?25h[?25l[1;39r[1;1H[2M[1;40r[39;1HAccess Grafana at [38;5;224m`[mhttp://<manager-ip>:3000[38;5;224m`[m with default credentials [38;5;224m`[mad[?25h[?25lmin:admin[38;5;224m`[m.[39;27H[?25h[?25l[1;39r[1;1H[4M[1;40r[37;1H[38;5;224m## [m[38;5;225mSecrets Management[m
+
+[93m-[m Sensitive information (e.g., database passwords, JWT secrets) is manag[?25h[?25led using [1m**Docker secrets**[m.[39;40H[?25h[?25l[1;39r[39;1H
+[1;40r[39;1H[93m-[m All sensitive data is injected securely into containers during ru[?25h[?25lntime.[39;25H[?25h[?25l[1;39r[1;1H[6M[1;40r[35;1H[38;5;81m---[m
+
+[38;5;224m## [m[38;5;225mTroubleshooting[m
+
+[93m1.[m [1m**Service Fails to Start**[m: Check the logs u[?25h[?25lsing [38;5;224m`[mdocker service logs <service-name>[38;5;224m`[m.[39;9H[?25h[?25l[1;39r[39;1H
+[1;40r[39;1H[93m2.[m [1m**Network Issues**[m: Ensure the correct networks are created [?25h[?25land attached to services.[39;33H[?25h[?25l[1;39r[39;1H
+[1;40r[39;1H[93m3.[m [1m**Resource Constraints**[m: Ensure nodes have sufficient resources (CPU, RA[?25h[?25lM).[39;39H[?25h[?25l[1;39r[1;1H[3M[1;40r[38;1H[38;5;224m## [m[38;5;225mFuture Enhancements[m
+[93m-[m Implement advanced [1m**auto-scaling**[m based on metrics.[39;13H[?25h[?25l[1;39r[39;1H
+[1;40r[39;1H[93m-[m Add [1m**CI/CD**[m pipeline for automated deployments.[39;16H[?25h[?25l[1;39r[39;1H
+[1;40r[39;1H[93m-[m Integrate [1m**payment gateway**[m for real-world order processing.[39;7H[?25h[?25l[1;39r[1;1H[2M[1;40r[39;1H[38;5;224m## [m[38;5;225mConclusion[38C[?25h[?25l[1;39r[m[39;1H
+[1;40r[39;1HThis platform demonstrates how to set up a production-grade e-commerce system using Docker Swarm, with all essen[?25h[?25ltial features such as[39;1H[94m@@@                                                                                                                                  [1;39r[m[39;1H
+[1;40r[38;1HThis platform demonstrates how to set up a production-grade e-commerce system using Docker Swarm, with all essential features such ass[39;1H scalability, availability, securit[?25h[?25l[40;1H[K[1;39r[39;1H
+[1;40r[38;36Hy, and observability.[40;116H127,0-1[7CBot[39;1H[?25h[?25l[40;106H^[[39;1H[40;106H  [39;1H[40;106H^[[39;1H[40;106H  [39;1H[?25h[?25l[40;106H:[39;1H[40;106H[K[40;1H:[?25hwq[?25l[?2004l[>4;m"README.md" 127L, 4627B written[23;2t[23;1t
+[?1004l[?2004l[?1l>[?1049l[23;0;0t[?25h[>4;m[?2004h]0;alireza@manager01: ~/Docker-project[01;32malireza@manager01[00m:[01;34m~/Docker-project[00m$ vim README.md [1P[1P[1P[2@زش[1@ف[1P[1P[1P[2@ca[1@t
+[?2004l# ShopStream – E-Commerce Platform
+
+## Overview
+
+**ShopStream** is a production-ready, scalable e-commerce platform built using **Docker Swarm**. It is designed with a **microservices architecture** to handle core functionalities such as:
+
+- User Authentication and Sessions
+- Product Catalog and Search
+- Shopping Cart Management
+- Order Processing
+- Real-Time Notifications
+- Centralized Logging
+- Full Observability (Metrics, Alerts, Dashboards)
+
+This project aims to showcase DevOps principles, with a focus on **automation**, **scalability**, **availability**, and **fault tolerance**.
+
+## Features
+
+- **Docker Swarm** for orchestration and scaling
+- **Traefik** as reverse proxy and SSL termination
+- **Multi-replica services** to ensure high availability
+- **Secret management** using Docker Secrets
+- **Networking isolation** for better security and performance
+- **Rolling updates** with zero downtime
+- **Persistent storage** for stateful services (using Docker Volumes)
+- **Monitoring** with Prometheus and Grafana
+- **Centralized logging** using Loki and Promtail
+
+## Architecture
+
+The platform is built on the following **microservices**:
+
+### Edge Layer
+- **Traefik**: Reverse proxy for routing traffic to services with SSL termination and load balancing.
+
+### Application Layer
+- **Frontend Service**: A static web application served via Nginx.
+- **API Gateway**: Handles API request routing and authentication.
+- **Authentication Service**: Manages user sessions and JWT token generation.
+- **Product Service**: Manages product catalog and search functionality.
+- **Order Service**: Handles order creation, processing, and payment.
+- **Notification Service**: Sends real-time notifications via WebSockets.
+
+### Data Layer
+- **MariaDB**: Primary relational database.
+- **Redis**: Caching and session management.
+- **RabbitMQ**: Message broker for asynchronous communication.
+- **MinIO**: Object storage for product images.
+- **Elasticsearch**: Full-text search for product catalog.
+
+### Observability Layer
+- **Prometheus**: Metrics collection.
+- **Grafana**: Dashboards and monitoring.
+- **Loki**: Centralized logging.
+- **Promtail**: Collects logs from nodes and sends to Loki.
+
+## Setup Instructions
+
+### Prerequisites
+1. **Docker**: Docker 20.10 or later.
+2. **Docker Swarm**: At least 3 nodes (1 manager, 2 workers).
+3. **Git**: To clone this repository.
+
+### Deployment Steps
+
+1. **Clone the repository:**
+    ```bash
+    git clone https://github.com/<your-username>/ShopStream.git
+    cd ShopStream
+    ```
+
+2. **Deploy the stack:**
+    - Make sure Docker Swarm is initialized and the nodes are joined.
+    - Deploy the stack using:
+      ```bash
+      docker stack deploy -c docker-stack.yml shopstream
+      ```
+
+3. **Check the deployment status:**
+    ```bash
+    docker service ls
+    docker service ps shopstream_frontend
+    ```
+
+4. **Access the application:**
+    - Frontend should be accessible at `http://<manager-ip>:80`.
+
+### Secrets and Configurations
+- Docker secrets are created automatically during deployment (e.g., `db_root_password`, `jwt_secret`).
+- Custom configurations for services like Traefik, Prometheus, and Grafana are stored in `configs/` directory.
+
+### Testing the Deployment
+- **Health Check**: Ensure services are running by visiting `/health` endpoint for each service.
+- **Logs**: Check the logs for any service-related issues using `docker service logs`.
+
+---
+
+## Monitoring and Observability
+
+The platform includes **Prometheus** and **Grafana** for monitoring:
+
+- **Prometheus** collects metrics from Docker containers and hosts.
+- **Grafana** visualizes metrics via preconfigured dashboards.
+
+Access Grafana at `http://<manager-ip>:3000` with default credentials `admin:admin`.
+
+## Secrets Management
+
+- Sensitive information (e.g., database passwords, JWT secrets) is managed using **Docker secrets**.
+- All sensitive data is injected securely into containers during runtime.
+
+---
+
+## Troubleshooting
+
+1. **Service Fails to Start**: Check the logs using `docker service logs <service-name>`.
+2. **Network Issues**: Ensure the correct networks are created and attached to services.
+3. **Resource Constraints**: Ensure nodes have sufficient resources (CPU, RAM).
+
+## Future Enhancements
+- Implement advanced **auto-scaling** based on metrics.
+- Add **CI/CD** pipeline for automated deployments.
+- Integrate **payment gateway** for real-world order processing.
+
+## Conclusion
+This platform demonstrates how to set up a production-grade e-commerce system using Docker Swarm, with all essential features such as scalability, availability, security, and observability.
+
+[?2004h]0;alireza@manager01: ~/Docker-project[01;32malireza@manager01[00m:[01;34m~/Docker-project[00m$ cat README.md [K[K[K[K[K[K[K[K[K[Kَ[K ARCHITECTURE.md 
+[?2004l# ShopStream – Architecture & Planning Document
+
+## 1. System Overview
+
+ShopStream is a production-oriented e-commerce platform designed using a microservices architecture and deployed with Docker Swarm.
+
+The goal of this system is to support core e-commerce capabilities such as user authentication, product catalog management, order processing, and notifications while ensuring scalability, high availability, and fault tolerance.
+
+A microservices approach is used to allow independent development, deployment, and scaling of each service based on workload and responsibility.
+
+Docker Swarm is selected as the container orchestrator to provide multi-node scheduling, service replication, rolling updates, self-healing, and built-in service discovery.
+
+In this phase, the project focuses on planning and infrastructure setup only, including cluster design, networking, secrets, and persistence, without implementing full business logic.
+
+---
+
+## 2. Service Architecture
+
+The platform is composed of multiple independent services, each responsible for a specific domain of the system. This separation improves scalability, maintainability, and fault isolation.
+
+### 2.1 Edge Layer
+- **Traefik**  
+  Acts as the ingress controller and reverse proxy, handling incoming HTTP traffic, load balancing, and routing requests to internal services.
+
+### 2.2 Application Layer
+- **Frontend Service**  
+  A static web application (SPA) served via Nginx, responsible for rendering the user interface and communicating with backend APIs.
+
+- **API Gateway**  
+  Serves as a single entry point for backend APIs, responsible for request routing, authentication validation, and basic rate limiting.
+
+- **Authentication Service**  
+  Handles user authentication, token generation (JWT), and session-related logic.
+
+- **Product Service**  
+  Manages product catalog operations including listing, creation, updates, and search integration.
+
+- **Order Service**  
+  Responsible for order creation, processing, and interaction with payment and inventory systems (mocked in this phase).
+
+- **Notification Service**  
+  Handles real-time notifications such as order status updates using WebSocket or asynchronous messaging.
+
+### 2.3 Data Layer
+- **MariaDB**  
+  Primary relational database for persistent application data.
+
+- **Redis**  
+  Used for session storage, caching, and rate limiting.
+
+- **RabbitMQ**  
+  Message broker used for asynchronous communication between services.
+
+- **MinIO**  
+  Object storage for static assets such as product images.
+
+- **Elasticsearch**  
+  Provides full-text search capabilities for the product catalog.
+
+### 2.4 Observability Layer
+- **Prometheus**  
+  Collects metrics from services and infrastructure.
+
+- **Grafana**  
+  Visualizes metrics through dashboards.
+
+- **Loki**  
+  Aggregates and stores logs from all services.
+
+- **Promtail**  
+  Collects logs from nodes and forwards them to Loki.
+
+---
+
+## 3. Network Design and Isolation
+
+The platform uses multiple Docker overlay networks to enforce strict network isolation and follow the principle of least privilege.
+
+### Networks
+- **traefik-public**  
+  Public-facing network used exclusively by Traefik to accept incoming traffic from the internet.
+
+- **frontend**  
+  Network connecting the frontend service with Traefik.
+
+- **backend** (internal)  
+  Internal network used by backend microservices. This network is not accessible externally.
+
+- **data** (internal)  
+  Dedicated internal network for databases and stateful services.
+
+- **monitoring**  
+  Network reserved for observability and monitoring components.
+
+Services are attached only to the networks they require, preventing unauthorized access between layers.
+
+---
+
+## 4. Secrets Management
+
+All sensitive information is managed using Docker Secrets to avoid hardcoding credentials in configuration files or version control.
+
+### Secrets include:
+- Database root and application passwords
+- JWT signing keys
+- Redis authentication password
+- RabbitMQ credentials
+- MinIO secret keys
+- Grafana admin password
+- TLS private keys (if applicable)
+
+Secrets are injected into containers at runtime and never stored in images or source code.
+
+---
+
+## 5. Configuration Management
+
+Non-sensitive configuration files are managed using Docker Configs. These configurations are version-controlled and mounted into containers at runtime.
+
+### Configs include:
+- Traefik configuration
+- Nginx configuration for frontend
+- Prometheus and Alertmanager configuration
+- Grafana dashboards and datasources
+- Loki configuration
+
+---
+
+## 6. Data Persistence Strategy
+
+All stateful services use Docker volumes to ensure data persistence beyond the lifecycle of individual containers.
+
+### Persistent volumes include:
+- MariaDB data
+- Redis data
+- RabbitMQ data
+- MinIO data
+- Elasticsearch data
+- Prometheus data
+- Grafana data
+- Loki data
+
+This ensures that application data is preserved during restarts, updates, or failures.
+
+---
+
+## 7. Node Placement Strategy
+
+Placement constraints are used to improve reliability and operational safety.
+
+- Traefik and critical stateful services are scheduled on manager nodes.
+- Stateless application services are distributed across worker nodes.
+- Services are spread across nodes to maximize availability.
+
+---
+
+## 8. Deployment and Update Strategy
+
+All services are deployed using Docker Stack with a declarative configuration.
+
+Rolling updates are configured to ensure zero-downtime deployments:
+- Services are updated one replica at a time.
+- New containers start before old ones are stopped.
+- Automatic rollback is triggered in case of failure.
+
+---
+
+## 9. Verification and Validation
+
+The infrastructure setup is verified using the following commands:
+- `docker node ls` to validate cluster state
+- `docker network ls` to verify network creation
+- `docker secret ls` to confirm secrets management
+
+These checks ensure the platform is ready for application deployment in later phases.
+
+[?2004h]0;alireza@manager01: ~/Docker-project[01;32malireza@manager01[00m:[01;34m~/Docker-project[00m$ cat ARCHITECTURE.md [1P[1P[1P[1@v[1@i[1@m
+[?2004l[?1049h[22;0;0t[>4;2m[?1h=[?2004h[?1004h[1;40r[?12h[?12l[22;2t[22;1t[27m[23m[29m[m[H[2J[?25l[40;1H"ARCHITECTURE.md" 176L, 5952B[2;1H▽[6n[2;1H  [3;1HPzz\[0%m[6n[3;1H           [1;1H[>c]10;?]11;?[1;3HNetwork connecting the frontend service with Traefik.[2;1H[K[3;1H[38;5;130m-[m [1m**backend**[m (internal)  [3;27H[K[4;3HInternal network used by backend microservices. This network is not accessible externally.
+
+[38;5;130m-[m [1m**data**[m (internal)
+  Dedicated internal network for databases and stateful services.
+
+[38;5;130m-[m [1m**monitoring**[m
+  Network reserved for observability and monitoring components.
+
+Services are attached only to the networks they require, preventing unauthorized access between layers.
+
+[35m---[m
+
+[35m## [m[35m4. Secrets Management[m
+
+All sensitive information is managed using Docker Secrets to avoid hardcoding credentials in configuration files or version control.
+
+[35m### [m[35mSecrets include:[m
+[38;5;130m-[m Database root and application passwords
+[38;5;130m-[m JWT signing keys
+[38;5;130m-[m Redis authentication password
+[38;5;130m-[m RabbitMQ credentials
+[38;5;130m-[m MinIO secret keys
+[38;5;130m-[m Grafana admin password
+[38;5;130m-[m TLS private keys (if applicable)
+
+Secrets are injected into containers at runtime and never stored in images or source code.
+
+[35m---[m
+
+[35m## [m[35m5. Configuration Management[m
+
+Non-sensitive configuration files are managed using Docker Configs. These configurations are version-controlled and mounted into contt[36;1Hainers at runtime.
+
+[35m### [m[35mConfigs include:[m
+[38;5;130m-[m Traefik configuration[40;116H103,1[9C60%[20;1H[?25h[?4m[?12$p[?25l[40;106H/[20;1H[40;107H0[20;1H[40;108Hc[20;1H[40;109H0[20;1H[40;110Hc[20;1H[40;111H/[20;1H[40;112H0[20;1H[40;113Hc[20;1H[40;114H0[20;1H[40;115Hc[20;1H[40;106H          [20;1H[27m[23m[29m[m[H[2J[1;3HNetwork connecting the frontend service with Traefik.
+
+[93m-[m [1m**backend**[m (internal)
+  Internal network used by backend microservices. This network is not accessible externally.
+
+[93m-[m [1m**data**[m (internal)
+  Dedicated internal network for databases and stateful services.
+
+[93m-[m [1m**monitoring**[m
+  Network reserved for observability and monitoring components.
+
+Services are attached only to the networks they require, preventing unauthorized access between layers.
+
+[38;5;81m---[m
+
+[38;5;224m## [m[38;5;225m4. Secrets Management[m
+
+All sensitive information is managed using Docker Secrets to avoid hardcoding credentials in configuration files or version control.
+
+[38;5;224m### [m[38;5;225mSecrets include:[m
+[93m-[m Database root and application passwords
+[93m-[m JWT signing keys
+[93m-[m Redis authentication password
+[93m-[m RabbitMQ credentials
+[93m-[m MinIO secret keys
+[93m-[m Grafana admin password
+[93m-[m TLS private keys (if applicable)
+
+Secrets are injected into containers at runtime and never stored in images or source code.
+
+[38;5;81m---[m
+
+[38;5;224m## [m[38;5;225m5. Configuration Management[m
+
+Non-sensitive configuration files are managed using Docker Configs. These configurations are version-controlled and mounted into contt[36;1Hainers at runtime.
+
+[38;5;224m### [m[38;5;225mConfigs include:[m
+[93m-[m Traefik configuration[40;116H103,1[9C60%"ARCHITECTURE.md" 176L, 5952B[20;1H[?25h[?25l[40;118H2,0-1[19;1H[?25h[?25l[40;106H~@k[19;1H[40;106H   [18;1H[40;118H1,1  [18;1H[?25h[?25l[40;106H~@k[18;1H[40;106H   [17;1H[40;118H0,0-1[17;1H[?25h[?25l[40;116H99,1   [16;1H[?25h[?25l[40;106H~@k[16;1H[40;106H   [15;1H[40;117H8,0-1[15;1H[?25h[?25l[40;117H7,1  [14;1H[?25h[?25l[40;106H~@k[14;1H[40;106H   [13;1H[40;117H6,0-1[13;1H[?25h[?25l[40;106H~@k[13;1H[40;106H   [14;1H[40;117H7,1  [14;1H[?25h[?25l[40;106H~@k[14;1H[40;106H   [15;1H[40;117H8,0-1[15;1H[?25h[?25l[40;106H~@k[15;1H[40;106H   [16;1H[40;117H9,1  [16;1H[?25h[?25l[40;106H~@k[16;1H[40;106H   [17;1H[40;116H100,0-1[17;1H[?25h[?25l[40;106H~@k[17;1H[40;106H   [16;1H[40;116H99,1   [16;1H[?25h[?25l[40;106H~@k[16;1H[40;106H   [15;1H[40;117H8,0-1[15;1H[?25h[?25l[40;117H7,1  [14;1H[?25h[?25l[40;106H~@k[14;1H[40;106H   [13;1H[40;117H6,0-1[13;1H[?25h[?25l[40;117H5,1  [12;1H[?25h[?25l[40;106H~@k[12;1H[40;106H   [11;1H[40;117H4,0-1[11;1H[?25h[?25l[40;106H~@k[11;1H[40;106H   [10;1H[40;117H3,1  [10;1H[?25h[?25l[40;106H~@k[10;1H[40;106H   [9;1H[40;117H2[9;1H[?25h[?25l[40;106H~@k[9;1H[40;106H   [8;1H[40;117H1,0-1[8;1H[?25h[?25l[40;117H0,1  [7;1H[?25h[?25l[40;106H~@k[7;1H[40;106H   [6;1H[40;116H89[6;1H[?25h[?25l[1;39r[1;1H[L[1;40r[1;1H[93m-[m [1m**frontend**[m[40;1H[K[40;116H88,0-1[8C59%[6;1H[?25h[?25l[40;106H~@k[6;1H[40;106H   [6;1H[1;39r[1;1H[L[1;40r[40;116H[K[40;116H87,1[10C58%[6;1H[?25h[?25l[1;39r[1;1H[L[1;40r[1;3HPublic-facing network used exclusively by Traefik to accept incoming traffic from the internet.[40;116H[K[40;116H86,1[10C57%[6;1H[?25h[?25l[1;39r[1;1H[L[1;40r[1;1H[93m-[m [1m**traefik-public**[m[39;1H[94m@@@                                                                                                                                  [m[40;116H[K[40;116H85,0-1[8C57%[6;1H[?25h[?25l[40;106H~@k[6;1H[40;106H   [6;1H[1;39r[1;1H[L[1;40r[1;1H[38;5;224m### [m[38;5;225mNetworks[m[40;116H[K[40;116H84,1[10C56%[6;1H[?25h[?25l[1;39r[1;1H[L[1;40r[40;116H[K[40;116H83,1[10C56%[6;1H[?25h[?25l[40;106H~@k[6;1H[40;106H   [6;1H[1;39r[1;1H[L[1;40r[1;1HThe platform uses multiple Docker overlay networks to enforce strict network isolation and follow the principle of least privilege.[40;116H[K[40;116H82,0-1[8C55%[6;1H[?25h[?25l[40;106H~@k[6;1H[40;106H   [6;1H[1;39r[1;1H[L[1;40r[40;116H[K[40;116H81,1[10C54%[6;1H[?25h[?25l[1;39r[1;1H[L[1;40r[1;1H[38;5;224m## [m[38;5;225m3. Network Design and Isolation[m[40;116H[K[40;116H80,1[10C54%[6;1H[?25h[?25l[40;106H~@k[6;1H[40;106H   [6;1H[1;39r[1;1H[L[1;40r[40;116H[K[40;116H79,1[10C53%[6;1H[?25h[?25l[1;39r[1;1H[L[1;40r[1;1H[38;5;81m---[m[40;116H[K[40;116H78,0-1[8C52%[6;1H[?25h[?25l[40;106H~@k[6;1H[40;106H   [6;1H[1;39r[1;1H[L[1;40r[40;116H[K[40;116H77,1[10C51%[6;1H[?25h[?25l[40;106H~@k[6;1H[40;106H   [6;1H[1;39r[1;1H[L[1;40r[1;3HCollects logs from nodes and forwards them to Loki.[40;116H[K[40;116H76,0-1[8C51%[6;1H[?25h[?25l[40;106H~@k[6;1H[40;106H   [6;1H[1;39r[1;1H[L[1;40r[1;1H[93m-[m [1m**Promtail**[m[40;116H[K[40;116H75,1[10C50%[6;1H[?25h[?25l[40;106H~@k[6;1H[40;106H   [6;1H[1;39r[1;1H[L[1;40r[40;116H[K[40;116H74,0-1[8C49%[6;1H[?25h[?25l[40;106H~@k[6;1H[40;106H   [6;1H[1;39r[1;1H[L[1;40r[1;3HAggregates and stores logs from all services.[40;116H[K[40;116H73,1[10C48%[6;1H[?25h[?25l[40;106H~@k[6;1H[40;106H   [6;1H[1;39r[1;1H[L[1;40r[1;1H[93m-[m [1m**Loki**[m[40;116H[K[40;116H72,0-1[8C48%[6;1H[?25h[?25l[40;106H~@k[6;1H[40;106H   [6;1H[1;39r[1;1H[L[1;40r[40;116H[K[40;116H71,1[10C47%[6;1H[?25h[?25l[1;39r[1;1H[L[1;40r[1;3HVisualizes metrics through dashboards.[40;116H[K[40;116H70,1[10C46%[6;1H[?25h[?25l[40;106H~@k[6;1H[40;106H   [6;1H[1;39r[1;1H[L[1;40r[1;1H[93m-[m [1m**Grafana**[m[40;116H[K[40;116H69,0-1[8C45%[6;1H[?25h[?25l[1;39r[1;1H[L[1;40r[40;116H[K[40;116H68,1[10C45%[6;1H[?25h[?25l[1;39r[1;1H[L[1;40r[1;3HCollects metrics from services and infrastructure.[40;116H[K[40;116H67,1[10C44%[6;1H[?25h[?25l[40;106H~@k[6;1H[40;106H   [6;1H[1;39r[1;1H[L[1;40r[1;1H[93m-[m [1m**Prometheus**[m[40;116H[K[40;116H66,0-1[8C43%[6;1H[?25h[?25l[1;39r[1;1H[L[1;40r[1;1H[38;5;224m### [m[38;5;225m2.4 Observability Layer[m[40;116H[K[40;116H65,1[10C43%[6;1H[?25h[?25l[40;106H~@k[6;1H[40;106H   [6;1H[1;39r[1;1H[L[1;40r[40;116H[K[40;116H64,1[10C42%[6;1H[?25h[?25l[1;39r[1;1H[L[1;40r[1;3HProvides full-text search capabilities for the product catalog.[40;116H[K[40;116H63,0-1[8C41%[6;1H[?25h[?25l[40;106H~@k[6;1H[40;106H   [6;1H[1;39r[1;1H[L[1;40r[1;1H[93m-[m [1m**Elasticsearch**[m[40;116H[K[40;116H62,1[10C40%[6;1H[?25h[?25l[1;39r[1;1H[L[1;40r[40;116H[K[40;116H61,1[10C40%[6;1H[?25h[?25l[40;106H~@k[6;1H[40;106H   [6;1H[1;39r[1;1H[L[1;40r[1;3HObject storage for static assets such as product images.[40;116H[K[40;116H60,1[10C39%[6;1H[?25h[?25l[1;39r[1;1H[L[1;40r[1;1H[93m-[m [1m**MinIO**[m[40;116H[K[40;116H59,0-1[8C38%[6;1H[?25h[?25l[1;39r[1;1H[L[1;40r[40;116H[K[40;116H58,1[10C37%[6;1H[?25h[?25l[40;106H~@k[6;1H[40;106H   [6;1H[1;39r[1;1H[L[1;40r[1;3HMessage broker used for asynchronous communication between services.[40;116H[K[40;116H57,1[10C37%[6;1H[?25h[?25l[1;39r[1;1H[L[1;40r[1;1H[93m-[m [1m**RabbitMQ**[m[40;116H[K[40;116H56,0-1[8C36%[6;1H[?25h[?25l[40;106H~@k[6;1H[40;106H   [6;1H[1;39r[1;1H[L[1;40r[40;116H[K[40;116H55,1[10C35%[6;1H[?25h[?25l[1;39r[1;1H[L[1;40r[1;3HUsed for session storage, caching, and rate limiting.[40;116H[K[40;116H54,1[10C35%[6;1H[?25h[?25l[40;106H~@k[6;1H[40;106H   [6;1H[1;39r[1;1H[L[1;40r[1;1H[93m-[m [1m**Redis**[m[40;116H[K[40;116H53,0-1[8C34%[6;1H[?25h[?25l[1;39r[1;1H[L[1;40r[40;116H[K[40;116H52,1[10C33%[6;1H[?25h[?25l[1;39r[1;1H[L[1;40r[1;3HPrimary relational database for persistent application data.[40;116H[K[40;116H51,1[10C32%[6;1H[?25h[?25l[40;106H~@k[6;1H[40;106H   [6;1H[1;39r[1;1H[L[1;40r[1;1H[93m-[m [1m**MariaDB**[m[40;116H[K[40;116H50,0-1[8C32%[6;1H[?25h[?25l[1;39r[1;1H[L[1;40r[1;1H[38;5;224m### [m[38;5;225m2.3 Data Layer[m[40;116H[K[40;116H49,1[10C31%[6;1H[?25h[?25l[1;39r[1;1H[L[1;40r[40;116H[K[40;116H48,1[10C30%[6;1H[?25h[?25l[40;106H~@k[6;1H[40;106H   [6;1H[1;39r[1;1H[L[1;40r[1;3HHandles real-time notifications such as order status updates using WebSocket or asynchronous messaging.[40;116H[K[40;116H47,0-1[8C29%[6;1H[?25h[?25l[1;39r[1;1H[L[1;40r[1;1H[93m-[m [1m**Notification Service**[m[40;116H[K[40;116H46,1[10C29%[6;1H[?25h[?25l[1;39r[1;1H[L[1;40r[40;116H[K[40;116H45,1[10C28%[6;1H[?25h[?25l[40;106H~@k[6;1H[40;106H   [6;1H[1;39r[1;1H[L[1;40r[1;3HResponsible for order creation, processing, and interaction with payment and inventory systems (mocked in this phase).[40;116H[K[40;116H44,1[10C27%[6;1H[?25h[?25l[40;106H~@k[6;1H[40;106H   [6;1H[1;39r[1;1H[L[1;40r[1;1H[93m-[m [1m**Order Service**[m[40;116H[K[40;116H43,0-1[8C27%[6;1H[?25h[?25l[1;39r[1;1H[L[1;40r[40;116H[K[40;116H42,1[10C26%[6;1H[?25h[?25l[40;106H~@k[6;1H[40;106H   [6;1H[1;39r[1;1H[L[1;40r[1;3HManages product catalog operations including listing, creation, updates, and search integration.[40;116H[K[40;116H41,1[10C25%[6;1H[?25h[?25l[40;106H~@k[6;1H[40;106H   [6;1H[1;39r[1;1H[L[1;40r[1;1H[93m-[m [1m**Product Service**[m[40;116H[K[40;116H40,0-1[8C24%[6;1H[?25h[?25l[1;39r[1;1H[L[1;40r[40;116H[K[40;116H39,1[10C24%[6;1H[?25h[?25l[40;106H~@k[6;1H[40;106H   [6;1H[1;39r[1;1H[L[1;40r[1;3HHandles user authentication, token generation (JWT), and session-related logic.[40;116H[K[40;116H38,1[10C23%[6;1H[?25h[?25l[1;39r[1;1H[L[1;40r[1;1H[93m-[m [1m**Authentication Service**[m[40;116H[K[40;116H37,0-1[8C22%[6;1H[?25h[?25l[40;106H~@k[6;1H[40;106H   [6;1H[1;39r[1;1H[L[1;40r[40;116H[K[40;116H36,1[10C21%[6;1H[?25h[?25l[40;106H~@k[6;1H[40;106H   [7;1H[1;39r[1;1H[2L[1;40r[1;3HServes as a single entry point for backend APIs, responsible for request routing, authentication validation, and basic rate limitinn[2;1Hg.[40;116H[K[40;116H35,1[10C21%[7;1H[?25h[?25l[40;117H4,0-1[6;1H[?25h[?25l[40;106H~@k[6;1H[40;106H   [6;1H[1;39r[1;1H[L[1;40r[1;1H[93m-[m [1m**API Gateway**[m[40;116H[K[40;116H33,1[10C20%[6;1H[?25h[?25l[40;106H~@k[6;1H[40;106H   [6;1H[1;39r[1;1H[L[1;40r[40;116H[K[40;116H32,1[10C19%[6;1H[?25h[?25l[1;39r[1;1H[L[1;40r[1;3HA static web application (SPA) served via Nginx, responsible for rendering the user interface and communicating with backend APIs.[40;116H[K[40;116H31,0-1[8C18%[6;1H[?25h[?25l[1;39r[1;1H[2L[1;40r[1;1H[38;5;224m### [m[38;5;225m2.2 Application Layer[m
+[93m-[m [1m**Frontend Service**[m[40;116H[K[40;116H30,1[10C17%[6;1H[?25h[?25l[1;39r[1;1H[L[1;40r[40;116H[K[40;116H29,1[10C16%[6;1H[?25h[?25l[40;106H~@k[6;1H[40;106H   [7;1H[1;39r[1;1H[2L[1;40r[1;3HActs as the ingress controller and reverse proxy, handling incoming HTTP traffic, load balancing, and routing requests to internal  [2;1Hservices.[40;116H[K[40;116H28,0-1[8C15%[7;1H[?25h[?25l[40;106H~@k[7;1H[40;106H   [6;1H[40;117H7,1  [6;1H[?25h[?25l[1;39r[1;1H[L[1;40r[1;1H[93m-[m [1m**Traefik**[m[40;116H[K[40;116H26,1[10C15%[6;1H[?25h[?25l[40;106H~@k[6;1H[40;106H   [6;1H[1;39r[1;1H[L[1;40r[1;1H[38;5;224m### [m[38;5;225m2.1 Edge Layer[m[40;116H[K[40;116H25,1[10C14%[6;1H[?25h[?25l[40;106H~@k[6;1H[40;106H   [6;1H[1;39r[1;1H[L[1;40r[40;116H[K[40;116H24,0-1[8C13%[6;1H[?25h[?25l[40;106H~@k[6;1H[40;106H   [6;1H[1;39r[1;1H[2L[1;40r[1;1HThe platform is composed of multiple independent services, each responsible for a specific domain of the system. This separation imprr[2;1Hoves scalability, maintainability, and fault isolation.[40;116H[K[40;116H23,1[10C12%[6;1H[?25h[?25l[40;106H~@k[6;1H[40;106H   [6;1H[1;39r[1;1H[L[1;40r[40;116H[K[40;116H22,1[10C12%[6;1H[?25h[?25l[40;106H~@k[6;1H[40;106H   [6;1H[1;39r[1;1H[L[1;40r[1;1H[38;5;224m## [m[38;5;225m2. Service Architecture[m[40;116H[K[40;116H21,1[10C11%[6;1H[?25h[?25l[40;106H~@k[6;1H[40;106H   [6;1H[1;39r[1;1H[L[1;40r[40;116H[K[40;116H20,0-1[8C10%[6;1H[?25h[?25l[40;106H~@k[6;1H[40;106H   [6;1H[1;39r[1;1H[2L[1;40r[2;1H[38;5;81m---[m[40;116H[K[40;116H19,1[11C9%[6;1H[?25h[?25l[1;39r[1;1H[2L[1;40r[1;1HIn this phase, the project focuses on planning and infrastructure setup only, including cluster design, networking, secrets, and perss[2;1Histence, without implementing full business logic.[40;116H[K[40;116H18,0-1[9C8%[7;1H[?25h[?25l[40;106H~@k[7;1H[40;106H   [6;1H[40;117H7,1  [6;1H[?25h[?25l[1;39r[1;1H[L[1;40r[40;116H[K[40;116H16,0-1[9C7%[6;1H[?25h[?25l[1;39r[1;1H[2L[1;40r[1;1HDocker Swarm is selected as the container orchestrator to provide multi-node scheduling, service replication, rolling updates, self-hh[2;1Healing, and built-in service discovery.[40;116H[K[40;116H15,1[11C7%[7;1H[?25h[?25l[40;106H~@k[7;1H[40;106H   [6;1H[40;117H4,0-1[6;1H[?25h[?25l[1;39r[1;1H[3L[1;40r[1;1HA microservices approach is used to allow independent development, deployment, and scaling of each service based on workload and respp[2;1Honsibility.[40;116H[K[40;116H13,1[11C5%[7;1H[?25h[?25l[40;106H~@k[7;1H[40;106H   [6;1H[40;117H2,0-1[6;1H[?25h[?25l[1;39r[1;1H[3L[1;40r[1;1HThe goal of this system is to support core e-commerce capabilities such as user authentication, product catalog management, order proo[2;1Hcessing, and notifications while ensuring scalability, high availability, and fault tolerance.[40;116H[K[40;116H11,1[11C4%[7;1H[?25h[?25l[40;106H~@k[7;1H[40;106H   [6;1H[40;117H0,0-1[6;1H[?25h[?25l[40;106H~@k[6;1H[40;106H   [6;1H[1;39r[1;1H[2L[1;40r[1;1HShopStream is a production-oriented e-commerce platform designed using a microservices architecture and deployed with Docker Swarm.[40;116H[K[40;116H9,1[12C2%[6;1H[?25h[?25l[1;39r[1;1H[L[1;40r[40;116H[K[40;116H8,0-1[10C2%[6;1H[?25h[?25l[40;106H~@k[6;1H[40;106H   [6;1H[1;39r[1;1H[2L[1;40r[2;1H[38;5;224m## [m[38;5;225m1. System Overview[m[40;116H[K[40;116H7,1[12C0%[6;1H[?25h[?25l[40;106H~@k[6;1H[40;106H   [6;1H[1;39r[1;1H[L[1;40r[1;1H[38;5;224m# [m[38;5;225mShopStream –[1;15H Architecture & Planning Document[m[40;116H[K[40;116H6,0-1[9CTop[6;1H[?25h[?25l[40;106H~@k[6;1H[40;106H   [5;1H[40;116H5,1  [5;1H[?25h[?25l[40;106H~@k[5;1H[40;106H   [4;1H[40;116H4,0-1[4;1H[?25h[?25l[40;106H~@k[4;1H[40;106H   [3;1H[40;116H3,1  [3;1H[?25h[?25l[40;116H2,0-1[2;1H[?25h[?25l[40;116H1,1  [1;1H[?25h[?25l[40;106H~@k[1;1H[40;106H   [1;1H[?25h[?25l[40;106H~@k[1;1H[40;106H   [1;1H[?25h[?25l[40;106H~@k[1;1H[40;106H   [1;1H[?25h[?25l[40;106H~@k[1;1H[40;106H   [1;1H[?25h[?25l[40;106H~@k[1;1H[40;106H   [1;1H[?25h[?25l[40;106H~@k[1;1H[40;106H   [1;1H[?25h[?25l[40;106H~@k[1;1H[40;106H   [1;1H[?25h[?25l[40;106H~@k[1;1H[40;106H   [1;1H[?25h[?25l[40;106H~@k[1;1H[40;106H   [1;1H[?25h[?25l[40;106H~@k[1;1H[40;106H   [1;1H[?25h[?25l[40;106H~@k[1;1H[40;106H   [1;1H[?25h[?25l[40;106H~@k[1;1H[40;106H   [1;1H[?25h[?25l[40;106H~@k[1;1H[40;106H   [1;1H[?25h[?25l[40;106H~@k[1;1H[40;106H   [1;1H[?25h[?25l[40;106H~@k[1;1H[40;106H   [1;1H[?25h[?25l[40;106H~@k[1;1H[40;106H   [1;1H[?25h[?25l[40;106H~@k[1;1H[40;106H   [2;1H[40;116H2,0-1[2;1H[?25h[?25l[40;106H^M[2;1H[40;106H  [3;1H[40;116H3,1  [3;1H[?25h[?25l[40;106H~@k[3;1H[40;106H   [2;1H[40;116H2,0-1[2;1H[?25h[?25l[40;106Hi[2;1H[40;106H [2;1H[40;1H[1m-- INSERT --[m[40;116H[K[40;116H2,1[11CTop[2;1H[?25h[?25l[3;39r[3;1H[L[1;40r[40;116H[K[40;116H3,1[11CTop[3;1H[?25h[?25l[4;39r[4;1H[L[1;40r[40;116H[K[40;116H4,1[11CTop[4;1H[?25h[?25l[40;116H3[3;1H[?25h[?25l[4;39r[4;1H[L[1;40r[3;1HAuthor: Alireza Golestani
+Role: DevOps Enginee[39;1H[94m@@@                                                                                                                                  [m[40;11H[1m(paste) --[m[40;116H[K[4;21H[?25h[?25l[5;39r[5;1H[2L[1;40r[4;21Hr
+Date: 2026-01-31[40;11H[1m--a[m[40;13H[K[40;116H6,1[11CTop[6;1H[?25h[?25l[40;116H5[5;1H[?25h[?25l[40;118H2[5;2H[?25h[?25l[40;118H3[5;3H[?25h[?25l[40;118H4[5;4H[?25h[?25l[40;118H5[5;5H[?25h[?25l[40;118H6[5;6H[?25h[?25l[40;118H7[5;7H[?25h[?25l[40;116H4[4;7H[?25h[?25l[40;118H8[4;8H[?25h[?25l[40;118H9[4;9H[?25h[?25l[40;118H10[4;10H[?25h[?25l[40;119H2[4;12H[?25h[?25l[40;119H3[4;13H[?25h[?25l[40;119H4[4;14H[?25h[?25l[40;119H5[4;15H[?25h[?25l[40;119H6[4;16H[?25h[?25l[40;119H7[4;17H[?25h[?25l[40;119H8[4;18H[?25h[?25l[40;119H9[4;19H[?25h[?25l[40;118H20[4;20H[?25h[?25l[40;119H1[4;21H[?25h[?25l[40;119H2[4;22H[?25h[?25l [40;119H1[4;21H[?25h[?25l [40;119H0[4;20H[?25h[?25l [40;118H19[4;19H[?25h[?25l [40;119H8[4;18H[?25h[?25l [40;119H7[4;17H[?25h[?25l [40;119H6[4;16H[?25h[?25l [40;119H5[4;15H[?25h[?25l [40;119H4[4;14H[?25h[?25l[40;119H3[4;13H[?25h[?25l [40;119H2[4;12H[?25h[?25l [40;119H1[4;11H[?25h[?25l [40;119H0[4;10H[?25h[?25l [40;118H9 [4;9H[?25h[?25l [40;118H8[4;8H[?25h[?25l [40;118H7[4;7H[?25h[?25l[40;118H6[4;6H[?25h[?25l [40;118H5[4;5H[?25h[?25l [40;118H4[4;4H[?25h[?25l [40;118H3[4;3H[?25h[?25l [40;118H2[4;2H[?25h[?25l [40;118H1[4;1H[?25h[?25l[2;39r[39;1H
+[1;40r[2;1H[K[3;1HAuthor: Alireza Golestani[39;1H[93m-[m [1m**API Gateway**[m[40;116H[K[40;116H3,28[10CTop[3;28H[?25h[?25l[40;119H7[3;27H[?25h[?25l[40;119H8[3;28H[?25h[?25l[40;119H6[3;26H[?25h[?25l [40;119H5[3;25H[?25h[?25li[40;119H6[3;26H[?25h[?25l[40;116H4,17[4;17H[?25h[40;1H[K[4;16H[?25l[40;106H^[[4;16H[40;106H  [4;17H[40;116H4,16[10CTop[4;16H[?25h[?25l[40;106H:[4;16H[40;106H[K[40;1H:[?25hwq[?25l[?2004l[>4;m"ARCHITECTURE.md" 180L, 5999B written[23;2t[23;1t
+[?1004l[?2004l[?1l>[?1049l[23;0;0t[?25h[>4;m[?2004h]0;alireza@manager01: ~/Docker-project[01;32malireza@manager01[00m:[01;34m~/Docker-project[00m$ vim ARCHITECTURE.md \[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[KREADME.md 
+[?2004l[?1049h[22;0;0t[>4;2m[?1h=[?2004h[?1004h[1;40r[?12h[?12l[22;2t[22;1t[27m[23m[29m[m[H[2J[?25l[40;1H"README.md" 127L, 4627B[2;1H▽[6n[2;1H  [3;1HPzz\[0%m[6n[3;1H           [1;1H[>c]10;?]11;?[1;1H[38;5;130m-[m Custom configurations for services like Traefik, Prometheus, and Grafana are stored in [35m`[mconfigs/[35m`[m directory.[2;1H[K[3;1H[35m### [m[35mTesting the Deployment[m[3;27H[K[4;1H[38;5;130m-[m [1m**Health Check**[m: Ensure services are running by visiting [35m`[m/health[35m`[m endpoint for each service.
+[38;5;130m-[m [1m**Logs**[m: Check the logs for any service-related issues using [35m`[mdocker service logs[35m`[m.
+
+[35m---[m
+
+[35m## [m[35mMonitoring and Observability[m
+
+The platform includes [1m**Prometheus**[m and [1m**Grafana**[m for monitoring:
+
+[38;5;130m-[m [1m**Prometheus**[m collects metrics from Docker containers and hosts.
+[38;5;130m-[m [1m**Grafana**[m visualizes metrics via preconfigured dashboards.
+
+Access Grafana at [35m`[mhttp://<manager-ip>:3000[35m`[m with default credentials [35m`[madmin:admin[35m`[m.
+
+[35m## [m[35mSecrets Management[m
+
+[38;5;130m-[m Sensitive information (e.g., database passwords, JWT secrets) is managed using [1m**Docker secrets**[m.
+[38;5;130m-[m All sensitive data is injected securely into containers during runtime.
+
+[35m---[m
+
+[35m## [m[35mTroubleshooting[m
+
+[38;5;130m1.[m [1m**Service Fails to Start**[m: Check the logs using [35m`[mdocker service logs <service-name>[35m`[m.
+[38;5;130m2.[m [1m**Network Issues**[m: Ensure the correct networks are created and attached to services.
+[38;5;130m3.[m [1m**Resource Constraints**[m: Ensure nodes have sufficient resources (CPU, RAM).
+
+[35m## [m[35mFuture Enhancements[m
+[38;5;130m-[m Implement advanced [1m**auto-scaling**[m based on metrics.
+[38;5;130m-[m Add [1m**CI/CD**[m pipeline for automated deployments.
+[38;5;130m-[m Integrate [1m**payment gateway**[m for real-world order processing.
+
+[35m## [m[35mConclusion[m
+This platform demonstrates how to set up a production-grade e-commerce system using Docker Swarm, with all essential features such ass[38;1H scalability, availability, security, and observability.[40;116H127,0-1[7CBot[39;1H[?25h[?4m[?12$p[?25l[40;106H/[39;1H[40;107H0[39;1H[40;108Hc[39;1H[40;109H0[39;1H[40;110Hc[39;1H[40;111H/[39;1H[40;112H0[39;1H[40;113Hc[39;1H[40;114H0[39;1H[40;115Hc[39;1H[40;106H          [39;1H[27m[23m[29m[m[H[2J[1;1H[93m-[m Custom configurations for services like Traefik, Prometheus, and Grafana are stored in [38;5;224m`[mconfigs/[38;5;224m`[m directory.
+
+[38;5;224m### [m[38;5;225mTesting the Deployment[m
+[93m-[m [1m**Health Check**[m: Ensure services are running by visiting [38;5;224m`[m/health[38;5;224m`[m endpoint for each service.
+[93m-[m [1m**Logs**[m: Check the logs for any service-related issues using [38;5;224m`[mdocker service logs[38;5;224m`[m.
+
+[38;5;81m---[m
+
+[38;5;224m## [m[38;5;225mMonitoring and Observability[m
+
+The platform includes [1m**Prometheus**[m and [1m**Grafana**[m for monitoring:
+
+[93m-[m [1m**Prometheus**[m collects metrics from Docker containers and hosts.
+[93m-[m [1m**Grafana**[m visualizes metrics via preconfigured dashboards.
+
+Access Grafana at [38;5;224m`[mhttp://<manager-ip>:3000[38;5;224m`[m with default credentials [38;5;224m`[madmin:admin[38;5;224m`[m.
+
+[38;5;224m## [m[38;5;225mSecrets Management[m
+
+[93m-[m Sensitive information (e.g., database passwords, JWT secrets) is managed using [1m**Docker secrets**[m.
+[93m-[m All sensitive data is injected securely into containers during runtime.
+
+[38;5;81m---[m
+
+[38;5;224m## [m[38;5;225mTroubleshooting[m
+
+[93m1.[m [1m**Service Fails to Start**[m: Check the logs using [38;5;224m`[mdocker service logs <service-name>[38;5;224m`[m.
+[93m2.[m [1m**Network Issues**[m: Ensure the correct networks are created and attached to services.
+[93m3.[m [1m**Resource Constraints**[m: Ensure nodes have sufficient resources (CPU, RAM).
+
+[38;5;224m## [m[38;5;225mFuture Enhancements[m
+[93m-[m Implement advanced [1m**auto-scaling**[m based on metrics.
+[93m-[m Add [1m**CI/CD**[m pipeline for automated deployments.
+[93m-[m Integrate [1m**payment gateway**[m for real-world order processing.
+
+[38;5;224m## [m[38;5;225mConclusion[m
+This platform demonstrates how to set up a production-grade e-commerce system using Docker Swarm, with all essential features such ass[38;1H scalability, availability, security, and observability.[40;116H127,0-1[7CBot"README.md" 127L, 4627B[39;1H[?25h[?25l[40;118H6,1  [37;1H[?25h[?25l[40;106H~@k[37;1H[40;106H   [36;1H[40;118H5[36;1H[?25h[?25l[40;118H4,0-1[35;1H[?25h[?25l[40;118H3,1  [34;1H[?25h[?25l[40;106H~@k[34;1H[40;106H   [33;1H[40;118H2[33;1H[?25h[?25l[40;106H~@k[33;1H[40;106H   [32;1H[40;118H1[32;1H[?25h[?25l[40;118H0[31;1H[?25h[?25l[40;106H~@k[31;1H[40;106H   [30;1H[40;117H19,0-1[30;1H[?25h[?25l[40;106H~@k[30;1H[40;106H   [29;1H[40;118H8,1  [29;1H[?25h[?25l[40;106H~@k[29;1H[40;106H   [28;1H[40;118H7[28;1H[?25h[?25l[40;118H6[27;1H[?25h[?25l[40;106H~@k[27;1H[40;106H   [26;1H[40;118H5,0-1[26;1H[?25h[?25l[40;106H~@k[26;1H[40;106H   [25;1H[40;118H4,1  [25;1H[?25h[?25l[40;118H3,0-1[24;1H[?25h[?25l[40;106H~@k[24;1H[40;106H   [23;1H[40;118H2,1  [23;1H[?25h[?25l[40;106H~@k[23;1H[40;106H   [22;1H[40;118H1,0-1[22;1H[?25h[?25l[40;106H~@k[22;1H[40;106H   [21;1H[40;118H0,1  [21;1H[?25h[?25l[40;106H~@k[21;1H[40;106H   [20;1H[40;117H09[20;1H[?25h[?25l[40;106H~@k[20;1H[40;106H   [19;1H[40;118H8,0-1[19;1H[?25h[?25l[40;118H7,1  [18;1H[?25h[?25l[40;106H~@k[18;1H[40;106H   [17;1H[40;118H6,0-1[17;1H[?25h[?25l[40;118H5,1  [16;1H[?25h[?25l[40;118H4,0-1[15;1H[?25h[?25l[40;106H~@k[15;1H[40;106H   [14;1H[40;118H3,1  [14;1H[?25h[?25l[40;118H2[13;1H[?25h[?25l[40;106H~@k[13;1H[40;106H   [12;1H[40;118H1,0-1[12;1H[?25h[?25l[40;106H~@k[12;1H[40;106H   [11;1H[40;118H0,1  [11;1H[?25h[?25l[40;106H~@k[11;1H[40;106H   [10;1H[40;116H99,0-1[10;1H[?25h[?25l[40;117H8,1  [9;1H[?25h[?25l[40;106H~@k[9;1H[40;106H   [8;1H[40;117H7,0-1[8;1H[?25h[?25l[40;117H6,1  [7;1H[?25h[?25l[40;106H~@k[7;1H[40;106H   [6;1H[40;117H5,0-1[6;1H[?25h[?25l[1;39r[1;1H[L[1;40r[1;1H[93m-[m Docker secrets are created automatically during deployment (e.g., [38;5;224m`[mdb_root_password[38;5;224m`[m, [38;5;224m`[mjwt_secret[38;5;224m`[m).[40;1H[K[40;116H94,1[10C98%[6;1H[?25h[?25l[40;106H~@k[6;1H[40;106H   [6;1H[1;39r[1;1H[L[1;40r[1;1H[38;5;224m### [m[38;5;225mSecrets and Configurations[m[39;1H[94m@@@                                                                                                                                  [m[40;116H[K[40;116H93,1[10C97%[6;1H[?25h[?25l[40;106H~@k[6;1H[40;106H   [6;1H[1;39r[1;1H[L[1;40r[40;116H[K[40;116H92,1[10C97%[6;1H[?25h[?25l[40;106H~@k[6;1H[40;106H   [6;1H[1;39r[1;1H[L[1;40r[1;1H[93m    -[m Frontend should be accessible at [38;5;224m`[mhttp://<manager-ip>:80[38;5;224m`[m.[40;116H[K[40;116H91,0-1[8C96%[6;1H[?25h[?25l[40;106H~@k[6;1H[40;106H   [6;1H[1;39r[1;1H[L[1;40r[1;1H[93m4.[m [1m**Access the application:**[m[40;116H[K[40;116H90,1[10C95%[6;1H[?25h[?25l[40;106H~@k[6;1H[40;106H   [6;1H[1;39r[1;1H[L[1;40r[40;116H[K[40;116H89,1[10C94%[6;1H[?25h[?25l[40;106H~@k[6;1H[40;106H   [6;1H[1;39r[1;1H[L[1;40r[1;1H[38;5;224m    ```[m[40;116H[K[40;116H88,1[10C93%[6;1H[?25h[?25l[40;106H~@k[6;1H[40;106H   [6;1H[1;39r[1;1H[L[1;40r[1;5Hdocker service ps shopstream_frontend[40;116H[K[40;116H87,0-1[8C92%[6;1H[?25h[?25l[40;106H~@k[6;1H[40;106H   [6;1H[1;39r[1;1H[L[1;40r[1;5Hdocker service ls[40;116H[K[40;116H86,1[10C90%[6;1H[?25h[?25l[1;39r[1;1H[L[1;40r[1;1H[38;5;224m    ```bash[m[40;116H[K[40;116H85,1[10C89%[6;1H[?25h[?25l[40;106H~@k[6;1H[40;106H   [6;1H[1;39r[1;1H[L[1;40r[1;1H[93m3.[m [1m**Check the deployment status:**[m[40;116H[K[40;116H84,0-1[8C88%[6;1H[?25h[?25l[40;106H~@k[6;1H[40;106H   [6;1H[1;39r[1;1H[L[1;40r[40;116H[K[40;116H83,1[10C87%[6;1H[?25h[?25l[1;39r[1;1H[L[1;40r[1;1H[38;5;224m      ```[m[40;116H[K[40;116H82,1[10C86%[6;1H[?25h[?25l[40;106H~@k[6;1H[40;106H   [6;1H[1;39r[1;1H[L[1;40r[1;7Hdocker stack deploy -c docker-stack.yml shopstream[40;116H[K[40;116H81,1[10C85%[6;1H[?25h[?25l[40;106H~@k[6;1H[40;106H   [6;1H[1;39r[1;1H[L[1;40r[1;1H[38;5;224m      ```bash[m[40;116H[K[40;116H80,1[10C84%[6;1H[?25h[?25l[40;106H~@k[6;1H[40;106H   [6;1H[1;39r[1;1H[L[1;40r[1;1H[93m    -[m Deploy the stack using:[40;116H[K[40;116H79,1[10C82%[6;1H[?25h[?25l[40;106H~@k[6;1H[40;106H   [6;1H[1;39r[1;1H[L[1;40r[1;1H[93m    -[m Make sure Docker Swarm is initialized and the nodes are joined.[40;116H[K[40;116H78,0-1[8C81%[6;1H[?25h[?25l[40;106H~@k[6;1H[40;106H   [6;1H[1;39r[1;1H[L[1;40r[1;1H[93m2.[m [1m**Deploy the stack:**[m[40;116H[K[40;116H77,1[10C80%[6;1H[?25h[?25l[1;39r[1;1H[L[1;40r[40;116H[K[40;116H76,1[10C79%[6;1H[?25h[?25l[40;106H~@k[6;1H[40;106H   [6;1H[1;39r[1;1H[L[1;40r[1;1H[38;5;224m    ```[m[40;116H[K[40;116H75,1[10C78%[6;1H[?25h[?25l[40;106H~@k[6;1H[40;106H   [6;1H[1;39r[1;1H[L[1;40r[1;5Hcd ShopStream[40;116H[K[40;116H74,1[10C77%[6;1H[?25h[?25l[1;39r[1;1H[L[1;40r[1;5Hgit clone https://github.com/<your-username>/ShopStream.git[40;116H[K[40;116H73,1[10C76%[6;1H[?25h[?25l[40;106H~@k[6;1H[40;106H   [6;1H[1;39r[1;1H[L[1;40r[1;1H[38;5;224m    ```bash[m[40;116H[K[40;116H72,1[10C75%[6;1H[?25h[?25l[1;39r[1;1H[L[1;40r[1;1H[93m1.[m [1m**Clone the repository:**[m[40;116H[K[40;116H71,0-1[8C73%[6;1H[?25h[?25l[40;106H~@k[6;1H[40;106H   [6;1H[1;39r[1;1H[L[1;40r[40;116H[K[40;116H70,1[10C72%[6;1H[?25h[?25l[40;106H~@k[6;1H[40;106H   [6;1H[1;39r[1;1H[L[1;40r[1;1H[38;5;224m### [m[38;5;225mDeployment Steps[m[40;116H[K[40;116H69,1[10C71%[6;1H[?25h[?25l[40;106H~@k[6;1H[40;106H   [6;1H[1;39r[1;1H[L[1;40r[40;116H[K[40;116H68,1[10C70%[6;1H[?25h[?25l[40;106H~@k[6;1H[40;106H   [6;1H[1;39r[1;1H[L[1;40r[1;1H[93m3.[m [1m**Git**[m: To clone this repository.[40;116H[K[40;116H67,1[10C69%[6;1H[?25h[?25l[40;106H~@k[6;1H[40;106H   [6;1H[1;39r[1;1H[L[1;40r[1;1H[93m2.[m [1m**Docker Swarm**[m: At least 3 nodes (1 manager, 2 workers).[40;116H[K[40;116H66,1[10C68%[6;1H[?25h[?25l[40;106H~@k[6;1H[40;106H   [6;1H[1;39r[1;1H[L[1;40r[1;1H[93m1.[m [1m**Docker**[m: Docker 20.10 or later.[40;116H[K[40;116H65,0-1[8C67%[6;1H[?25h[?25l[40;106H~@k[6;1H[40;106H   [6;1H[1;39r[1;1H[L[1;40r[1;1H[38;5;224m### [m[38;5;225mPrerequisites[m[40;116H[K[40;116H64,1[10C65%[6;1H[?25h[?25l[40;106H~@k[6;1H[40;106H   [6;1H[1;39r[1;1H[L[1;40r[40;116H[K[40;116H63,0-1[8C64%[6;1H[?25h[?25l[40;106H~@k[6;1H[40;106H   [6;1H[1;39r[1;1H[L[1;40r[1;1H[38;5;224m## [m[38;5;225mSetup Instructions[m[40;116H[K[40;116H62,1[10C63%[6;1H[?25h[?25l[1;39r[1;1H[L[1;40r[40;116H[K[40;116H61,1[10C62%[6;1H[?25h[?25l[40;106H~@k[6;1H[40;106H   [6;1H[1;39r[1;1H[L[1;40r[1;1H[93m-[m [1m**Promtail**[m: Collects logs from nodes and sends to Loki.[40;116H[K[40;116H60,1[10C61%[6;1H[?25h[?25l[40;106H~@k[6;1H[40;106H   [6;1H[1;39r[1;1H[L[1;40r[1;1H[93m-[m [1m**Loki**[m: Centralized logging.[40;116H[K[40;116H59,1[10C60%[6;1H[?25h[?25l[1;39r[1;1H[L[1;40r[1;1H[93m-[m [1m**Grafana**[m: Dashboards and monitoring.[40;116H[K[40;116H58,0-1[8C59%[6;1H[?25h[?25l[40;106H~@k[6;1H[40;106H   [6;1H[1;39r[1;1H[L[1;40r[1;1H[93m-[m [1m**Prometheus**[m: Metrics collection.[40;116H[K[40;116H57,1[10C57%[6;1H[?25h[?25l[40;106H~@k[6;1H[40;106H   [6;1H[1;39r[1;1H[L[1;40r[1;1H[38;5;224m### [m[38;5;225mObservability Layer[m[40;116H[K[40;116H56,0-1[8C56%[6;1H[?25h[?25l[40;106H~@k[6;1H[40;106H   [6;1H[1;39r[1;1H[L[1;40r[40;116H[K[40;116H55,1[10C55%[6;1H[?25h[?25l[40;106H~@k[6;1H[40;106H   [6;1H[1;39r[1;1H[L[1;40r[1;1H[93m-[m [1m**Elasticsearch**[m: Full-text search for product catalog.[40;116H[K[40;116H54,1[10C54%[6;1H[?25h[?25l[40;106H~@k[6;1H[40;106H   [6;1H[1;39r[1;1H[L[1;40r[1;1H[93m-[m [1m**MinIO**[m: Object storage for product images.[40;116H[K[40;116H53,1[10C53%[6;1H[?25h[?25l[40;106H~@k[6;1H[40;106H   [6;1H[1;39r[1;1H[L[1;40r[1;1H[93m-[m [1m**RabbitMQ**[m: Message broker for asynchronous communication.[40;116H[K[40;116H52,1[10C52%[6;1H[?25h[?25l[1;39r[1;1H[L[1;40r[1;1H[93m-[m [1m**Redis**[m: Caching and session management.[40;116H[K[40;116H51,1[10C51%[6;1H[?25h[?25l[40;106H~@k[6;1H[40;106H   [6;1H[1;39r[1;1H[L[1;40r[1;1H[93m-[m [1m**MariaDB**[m: Primary relational database.[40;116H[K[40;116H50,0-1[8C50%[6;1H[?25h[?25l[40;106H~@k[6;1H[40;106H   [6;1H[1;39r[1;1H[L[1;40r[1;1H[38;5;224m### [m[38;5;225mData Layer[m[40;116H[K[40;116H49,1[10C48%[6;1H[?25h[?25l[40;106H~@k[6;1H[40;106H   [6;1H[1;39r[1;1H[L[1;40r[40;116H[K[40;116H48,1[10C47%[6;1H[?25h[?25l[40;106H~@k[6;1H[40;106H   [6;1H[1;39r[1;1H[L[1;40r[1;1H[93m-[m [1m**Notification Service**[m: Sends real-time notifications via WebSockets.[40;116H[K[40;116H47,1[10C46%[6;1H[?25h[?25l[40;106H~@k[6;1H[40;106H   [6;1H[1;39r[1;1H[L[1;40r[1;1H[93m-[m [1m**Order Service**[m: Handles order creation, processing, and payment.[40;116H[K[40;116H46,1[10C45%[6;1H[?25h[?25l[40;106H~@k[6;1H[40;106H   [6;1H[1;39r[1;1H[L[1;40r[1;1H[93m-[m [1m**Product Service**[m: Manages product catalog and search functionality.[40;116H[K[40;116H45,1[10C44%[6;1H[?25h[?25l[40;106H~@k[6;1H[40;106H   [6;1H[1;39r[1;1H[L[1;40r[1;1H[93m-[m [1m**Authentication Service**[m: Manages user sessions and JWT token generation.[40;116H[K[40;116H44,1[10C43%[6;1H[?25h[?25l[40;106H~@k[6;1H[40;106H   [6;1H[1;39r[1;1H[L[1;40r[1;1H[93m-[m [1m**API Gateway**[m: Handles API request routing and authentication.[40;116H[K[40;116H43,0-1[8C42%[6;1H[?25h[?25l[1;39r[1;1H[L[1;40r[1;1H[93m-[m [1m**Frontend Service**[m: A static web application served via Nginx.[40;116H[K[40;116H42,1[10C40%[6;1H[?25h[?25l[40;106H~@k[6;1H[40;106H   [6;1H[1;39r[1;1H[L[1;40r[1;1H[38;5;224m### [m[38;5;225mApplication Layer[m[40;116H[K[40;116H41,1[10C39%[6;1H[?25h[?25l[1;39r[1;1H[L[1;40r[40;116H[K[40;116H40,1[10C38%[6;1H[?25h[?25l[40;106H~@k[6;1H[40;106H   [6;1H[1;39r[1;1H[L[1;40r[1;1H[93m-[m [1m**Traefik**[m: Reverse proxy for routing traffic to services with SSL termination and load balancing.[40;116H[K[40;116H39,1[10C37%[6;1H[?25h[?25l[1;39r[1;1H[L[1;40r[1;1H[38;5;224m### [m[38;5;225mEdge Layer[m[40;116H[K[40;116H38,1[10C36%[6;1H[?25h[?25l[1;39r[1;1H[L[1;40r[40;116H[K[40;116H37,1[10C35%[6;1H[?25h[?25l[40;106H~@k[6;1H[40;106H   [6;1H[1;39r[1;1H[L[1;40r[1;1HThe platform is built on the following [1m**microservices**[m:[40;116H[K[40;116H36,1[10C34%[6;1H[?25h[?25l[40;106H~@k[6;1H[40;106H   [6;1H[1;39r[1;1H[L[1;40r[40;116H[K[40;116H35,0-1[8C32%[6;1H[?25h[?25l[40;106H~@k[6;1H[40;106H   [6;1H[1;39r[1;1H[L[1;40r[1;1H[38;5;224m## [m[38;5;225mArchitecture[m[40;116H[K[40;116H34,1[10C31%[6;1H[?25h[?25l[1;39r[1;1H[L[1;40r[40;116H[K[40;116H33,1[10C30%[6;1H[?25h[?25l[40;106H~@k[6;1H[40;106H   [6;1H[1;39r[1;1H[L[1;40r[1;1H[93m-[m [1m**Centralized logging**[m using Loki and Promtail[40;116H[K[40;116H32,0-1[8C29%[6;1H[?25h[?25l[1;39r[1;1H[L[1;40r[1;1H[93m-[m [1m**Monitoring**[m with Prometheus and Grafana[40;116H[K[40;116H31,1[10C28%[6;1H[?25h[?25l[40;106H~@k[6;1H[40;106H   [6;1H[1;39r[1;1H[L[1;40r[1;1H[93m-[m [1m**Persistent storage**[m for stateful services (using Docker Volumes)[40;116H[K[40;116H30,0-1[8C27%[6;1H[?25h[?25l[40;106H~@k[6;1H[40;106H   [6;1H[1;39r[1;1H[L[1;40r[1;1H[93m-[m [1m**Rolling updates**[m with zero downtime[40;116H[K[40;116H29,1[10C26%[6;1H[?25h[?25l[40;106H~@k[6;1H[40;106H   [6;1H[1;39r[1;1H[L[1;40r[1;1H[93m-[m [1m**Networking isolation**[m for better security and performance[40;116H[K[40;116H28,0-1[8C25%[6;1H[?25h[?25l[40;106H~@k[6;1H[40;106H   [6;1H[1;39r[1;1H[L[1;40r[1;1H[93m-[m [1m**Secret management**[m using Docker Secrets[40;116H[K[40;116H27,1[10C23%[6;1H[?25h[?25l[40;106H~@k[6;1H[40;106H   [6;1H[1;39r[1;1H[L[1;40r[1;1H[93m-[m [1m**Multi-replica services**[m to ensure high availability[40;116H[K[40;116H26,1[10C22%[6;1H[?25h[?25l[40;106H~@k[6;1H[40;106H   [6;1H[1;39r[1;1H[L[1;40r[1;1H[93m-[m [1m**Traefik**[m as reverse proxy and SSL termination[40;116H[K[40;116H25,1[10C21%[6;1H[?25h[?25l[40;106H~@k[6;1H[40;106H   [6;1H[1;39r[1;1H[L[1;40r[1;1H[93m-[m [1m**Docker Swarm**[m for orchestration and scaling[40;116H[K[40;116H24,1[10C20%[6;1H[?25h[?25l[40;106H~@k[6;1H[40;106H   [6;1H[1;39r[1;1H[L[1;40r[40;116H[K[40;116H23,1[10C19%[6;1H[?25h[?25l[1;39r[1;1H[L[1;40r[1;1H[38;5;224m## [m[38;5;225mFeatures[m[40;116H[K[40;116H22,1[10C18%[6;1H[?25h[?25l[40;106H~@k[6;1H[40;106H   [6;1H[1;39r[1;1H[L[1;40r[40;116H[K[40;116H21,1[10C17%[6;1H[?25h[?25l[40;106H~@k[6;1H[40;106H   [7;1H[1;39r[1;1H[2L[1;40r[1;1HThis project aims to showcase DevOps principles, with a focus on [1m**automation**[m, [1m**scalability**[m, [1m**availability**[m, and [1m**fault tolerr[2;1Hance**[m.[40;116H[K[40;116H20,1[10C15%[7;1H[?25h[?25l[40;106H~@k[7;1H[40;106H   [6;1H[40;116H19[6;1H[?25h[?25l[1;39r[1;1H[L[1;40r[40;116H[K[40;116H18,0-1[8C14%[6;1H[?25h[?25l[1;39r[1;1H[L[1;40r[1;1H[93m-[m Full Observability (Metrics, Alerts, Dashboards)[40;116H[K[40;116H17,1[10C13%[6;1H[?25h[?25l[40;106H~@k[6;1H[40;106H   [6;1H[1;39r[1;1H[L[1;40r[1;1H[93m-[m Centralized Logging[40;116H[K[40;116H16,0-1[8C12%[6;1H[?25h[?25l[40;106H~@k[6;1H[40;106H   [6;1H[1;39r[1;1H[2L[1;40r[1;1H[93m-[m Order Processing
+[93m-[m Real-Time Notifications[40;116H[K[40;116H15,1[10C10%[6;1H[?25h[?25l[1;39r[1;1H[L[1;40r[1;1H[93m-[m Shopping Cart Management[40;116H[K[40;116H14,0-1[9C8%[6;1H[?25h[?25l[40;106H~@k[6;1H[40;106H   [6;1H[1;39r[1;1H[L[1;40r[1;1H[93m-[m Product Catalog and Search[40;116H[K[40;116H13,1[11C7%[6;1H[?25h[?25l[40;106H~@k[6;1H[40;106H   [6;1H[1;39r[1;1H[L[1;40r[1;1H[93m-[m User Authentication and Sessions[40;116H[K[40;116H12,1[11C6%[6;1H[?25h[?25l[40;106H~@k[6;1H[40;106H   [6;1H[1;39r[1;1H[L[1;40r[40;116H[K[40;116H11,1[11C5%[6;1H[?25h[?25l[40;106H~@k[6;1H[40;106H   [7;1H[1;39r[1;1H[2L[1;40r[1;1H[1m**ShopStream**[m is a production-ready, scalable e-commerce platform built using [1m**Docker Swarm**[m. It is designed with a [1m**microservicee[2;1Hs architecture**[m to handle core functionalities such as:[40;116H[K[40;116H10,1[11C4%[7;1H[?25h[?25l[40;116H9,1 [6;1H[?25h[?25l[40;106H~@k[6;1H[40;106H   [6;1H[1;39r[1;1H[L[1;40r[40;116H[K[40;116H8,1[12C3%[6;1H[?25h[?25l[1;39r[1;1H[L[1;40r[1;1H[38;5;224m## [m[38;5;225mOverview[m[40;116H[K[40;116H7,1[12C2%[6;1H[?25h[?25l[40;106H~@k[6;1H[40;106H   [6;1H[1;39r[1;1H[L[1;40r[40;116H[K[40;116H6,0-1[10C1%[6;1H[?25h[?25l[1;39r[1;1H[L[1;40r[1;1H[38;5;224m# [m[38;5;225mShopStream –[1;15H E-Commerce Platform[m[40;116H[K[40;116H5,1[11CTop[5;1H[?25h[?25l[40;106H~@k[5;1H[40;106H   [4;1H[40;116H4,0-1[4;1H[?25h[?25l[40;106H~@k[4;1H[40;106H   [3;1H[40;116H3,1  [3;1H[?25h[?25l[40;116H2,0-1[2;1H[?25h[?25l[40;106H~@k[2;1H[40;106H   [1;1H[40;116H1,1  [1;1H[?25h[?25l[40;106H~@k[1;1H[40;106H   [1;1H[?25h[?25l[40;106H~@k[1;1H[40;106H   [1;1H[?25h[?25l[40;106H~@k[1;1H[40;106H   [1;1H[?25h[?25l[40;106H~@k[1;1H[40;106H   [1;1H[?25h[?25l[40;106H~@k[1;1H[40;106H   [1;1H[?25h[?25l[40;106H~@k[1;1H[40;106H   [1;1H[?25h[?25l[40;106H~@k[1;1H[40;106H   [1;1H[?25h[?25l[40;106H~@k[1;1H[40;106H   [1;1H[?25h[?25l[40;106H~@k[1;1H[40;106H   [1;1H[?25h[?25l[40;106H~@k[1;1H[40;106H   [1;1H[?25h[?25l[40;106H~@k[1;1H[40;106H   [1;1H[?25h[?25l[40;106H~@k[1;1H[40;106H   [1;1H[?25h[?25l[40;106H~@k[1;1H[40;106H   [1;1H[?25h[?25l[40;106H~@k[1;1H[40;106H   [1;1H[?25h[?25l[40;106H~@k[1;1H[40;106H   [1;1H[?25h[?25l[40;106H~@k[1;1H[40;106H   [1;1H[?25h[?25l[40;106H~@k[1;1H[40;106H   [1;1H[?25h[?25l[40;106H~@k[1;1H[40;106H   [1;1H[?25h[?25l[40;106H:[1;1H[40;106H[K[40;1H:[?25hﺹ[?25l[?25hﺽ[?25lﺺﺿ[?25h[?25l[97m[41mE492: Not an editor command: ﺺﺿ[1;1H[m[40;116H1,1[11CTop[1;1H[?25h[?25l[40;106H:[1;1H[40;1H[K[40;1H:[?25hwq[?25l[?2004l[>4;m"README.md" 127L, 4627B written[23;2t[23;1t
+[?1004l[?2004l[?1l>[?1049l[23;0;0t[?25h[>4;m[?2004h]0;alireza@manager01: ~/Docker-project[01;32malireza@manager01[00m:[01;34m~/Docker-project[00m$ مس
+[?2004lمس: command not found
+[?2004h]0;alireza@manager01: ~/Docker-project[01;32malireza@manager01[00m:[01;34m~/Docker-project[00m$ ls
+[?2004lARCHITECTURE.md  README.md  RUNBOOK.md  [0m[01;34mscripts[0m  typescript
+[?2004h]0;alireza@manager01: ~/Docker-project[01;32malireza@manager01[00m:[01;34m~/Docker-project[00m$ [7mgit add .[27m
+[7mgit commit -m "Complete planning and infrastructure setup for ShopStream"[27m
+[A[A[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[Cgit add .
+git commit -m "Complete planning and infrastructure setup for ShopStream"
+[K[A[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[A[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C
+[?2004lfatal: not a git repository (or any of the parent directories): .git
+[?2004
